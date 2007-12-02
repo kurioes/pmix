@@ -21,6 +21,12 @@ public class MyHandler extends Handler {
 		this.mainMenuActivity = mainMenuActivity;
 	}
 
+	private static String timeToString(long seconds) {
+		long min = seconds / 60;
+		long sec = seconds - min * 60;
+		return (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
+	}
+
 	@Override
 	public void handleMessage(Message msg) {
 
@@ -42,7 +48,11 @@ public class MyHandler extends Handler {
 		}
 
 		mainMenuActivity.getProgressBar().setProgress(status.getVolume());
-
+		if (status.getTotalTime() > 0) {
+			mainMenuActivity.getTrackTime().setText(timeToString(status.getElapsedTime()) + " - " + timeToString(status.getTotalTime()));
+		} else {
+			mainMenuActivity.getTrackTime().setText("");
+		}
 		lastKnownElapsedTime = status.getElapsedTime();
 		mainMenuActivity.getProgressBarTrack().setProgress((int) (lastKnownElapsedTime * 100 / status.getTotalTime()));
 	}

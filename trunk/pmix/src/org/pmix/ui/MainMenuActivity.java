@@ -47,6 +47,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private ProgressBar progressBarTrack = null;
 
+	private TextView trackTime = null;
+
 	private MyHandler handler;
 
 	private static final int VOLUME_STEP = 5;
@@ -74,6 +76,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
 		progressBar = (ProgressBar) findViewById(R.id.progress_volume);
 		progressBarTrack = (ProgressBar) findViewById(R.id.progress_track);
+		
+		trackTime  = (TextView) findViewById(R.id.trackTime);
 
 		try {
 			final MPD mpd = Contexte.getInstance().getMpd();
@@ -334,6 +338,10 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		message.obj = status;
 		handler.sendMessage(message);
 
+	}
+
+	public TextView getTrackTime() {
+		return trackTime;
 	}
 
 }
