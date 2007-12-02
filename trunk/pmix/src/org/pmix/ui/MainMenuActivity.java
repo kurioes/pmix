@@ -20,6 +20,7 @@ import org.pmix.settings.Settings;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.Menu;
@@ -29,6 +30,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener {
+
+	public static final String PREFS_NAME = "pmix.properties";
 
 	public static final int ARTISTS = 1;
 
@@ -51,8 +54,22 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	private static final int TRACK_STEP = 10;
 
 	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
+	protected void onActivityResult(int requestCode, int resultCode, String data, Bundle extras) {
+
+		super.onActivityResult(requestCode, resultCode, data, extras);
+
+		switch (requestCode) {
+		case SETTINGS:
+			init();
+			break;
+
+		default:
+			break;
+		}
+
+	}
+
+	private void init() {
 		setContentView(R.layout.main);
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
 		progressBar = (ProgressBar) findViewById(R.id.progress_volume);
@@ -148,6 +165,20 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 		} catch (MPDServerException e) {
 			this.setTitle("Error");
+		}
+	}
+
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		if (settings.getAll().get("serverAddress") == null) {
+			this.startSubActivity(new Intent(this, SettingsActivity.class), SETTINGS);
+		}
+		// Settings.getInstance().setServerAddress(set)
+		else {
+			init();
 		}
 
 	}
@@ -252,32 +283,36 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
-
 		Contexte.getInstance().disconnect();
-
+		savePreferences();
 	}
 
 	@Override
 	protected void onFreeze(Bundle outState) {
-		// TODO Auto-generated method stub
 		super.onFreeze(outState);
 		Contexte.getInstance().disconnect();
 	}
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		Contexte.getInstance().disconnect();
 	}
 
 	@Override
 	protected void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
 		Contexte.getInstance().disconnect();
+		savePreferences();
+	}
+
+	private void savePreferences() {
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString("serverAddress", Settings.getInstance().getServerAddress());
+
+		editor.commit();
 	}
 
 	public ProgressBar getProgressBar() {
