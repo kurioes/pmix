@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.pmix.ui">
+    <application android:icon="@drawable/icon"  android:theme="@android:style/Theme.Dark">
+   
+    	
+        <activity class=".MainMenuActivity" android:label="@string/app_name">
+            <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+                <category android:value="android.intent.category.LAUNCHER" />
+            </intent-filter>
+             <intent-filter>
+                <action android:value="change" />
+            </intent-filter>
+             <receiver class=".MainMenuActivity$MyIntentReceiver" />
+        </activity>
+          <activity class=".ArtistsActivity" android:label="@string/artists"/>
+           <activity class=".SettingsActivity" android:label="@string/settings"/>
+          <activity class=".FSActivity" android:label="@string/files"/>
+          <activity class=".AlbumsActivity" android:label="@string/albums"/>
+           <activity class=".SongsActivity" android:label="@string/artists"/>
+    </application>
+</manifest> 
