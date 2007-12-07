@@ -187,7 +187,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
+	//	mainInfo.setText(keyCode + "");
 		try {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
@@ -197,6 +197,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
 				progressBar.incrementProgressBy(-VOLUME_STEP);
 				Contexte.getInstance().getMpd().adjustVolume(-VOLUME_STEP);
+				return true;
+			case KeyEvent.KEYCODE_DPAD_LEFT:
+				Contexte.getInstance().getMpd().previous();
+				return true;
+			case KeyEvent.KEYCODE_DPAD_RIGHT:
+				Contexte.getInstance().getMpd().next();
 				return true;
 			default:
 				return false;
