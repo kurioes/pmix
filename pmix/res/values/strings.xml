@@ -12,6 +12,7 @@
 	<string name="serverAddress">Server Address :</string>
 
 	<string name="prev">|&lt;&lt;</string>
+	<string name="playpause">|&gt;</string>
 	<string name="next">&gt;&gt;|</string>
 	<string name="back">&lt;&lt;</string>
 	<string name="forward">&gt;&gt;</string>
