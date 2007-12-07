@@ -151,6 +151,19 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				}
 			});
 
+			button = (Button) findViewById(R.id.playpause);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+
+					try {
+						mpd.pause();
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			
 			button = (Button) findViewById(R.id.forward);
 			button.setOnClickListener(new Button.OnClickListener() {
 				public void onClick(View v) {
