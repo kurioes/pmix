@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Message;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -76,8 +77,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
 		progressBar = (ProgressBar) findViewById(R.id.progress_volume);
 		progressBarTrack = (ProgressBar) findViewById(R.id.progress_track);
-		
-		trackTime  = (TextView) findViewById(R.id.trackTime);
+
+		trackTime = (TextView) findViewById(R.id.trackTime);
 
 		try {
 			final MPD mpd = Contexte.getInstance().getMpd();
@@ -162,8 +163,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 					}
 				}
 			});
-			
-			
+
 			button = (Button) findViewById(R.id.forward);
 			button.setOnClickListener(new Button.OnClickListener() {
 				public void onClick(View v) {
@@ -183,6 +183,30 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		} catch (MPDServerException e) {
 			this.setTitle("Error");
 		}
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+		try {
+			switch (keyCode) {
+			case KeyEvent.KEYCODE_VOLUME_UP:
+				progressBar.incrementProgressBy(VOLUME_STEP);
+				Contexte.getInstance().getMpd().adjustVolume(VOLUME_STEP);
+				return true;
+			case KeyEvent.KEYCODE_VOLUME_DOWN:
+				progressBar.incrementProgressBy(-VOLUME_STEP);
+				Contexte.getInstance().getMpd().adjustVolume(-VOLUME_STEP);
+				return true;
+			default:
+				return false;
+			}
+		} catch (MPDServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
 	}
 
 	@Override
