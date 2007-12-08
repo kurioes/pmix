@@ -67,12 +67,25 @@ public class FSActivity extends ListActivity {
 			Music music = (Music) currentDirectory.getFiles().toArray()[position - currentDirectory.getDirectories().size()];
 
 			try {
-				Contexte.getInstance().getMpd().getPlaylist().clear();
 
-				Contexte.getInstance().getMpd().getPlaylist().add(music);
-				Contexte.getInstance().getMpd().play();
+				int songId = -1;
+				// try to find it in the current playlist first
+
+				Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().find("filename", music.getFullpath());
+				
+				// not found
+				if (founds.isEmpty()) {
+					songId = Contexte.getInstance().getMpd().getPlaylist().addid(music);
+				} else {
+					// found
+					songId = founds.toArray(new Music[founds.size()])[0].getSongId();
+				}
+				if (songId > -1) {
+					Contexte.getInstance().getMpd().skipTo(songId);
+				}
+				
 			} catch (MPDServerException e) {
-
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {

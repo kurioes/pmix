@@ -1,6 +1,7 @@
 package org.pmix.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.a0z.mpd.MPD;
@@ -49,15 +50,24 @@ public class SongsActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
 		Music music = musics.get(getSelection());
-		// Contexte.getInstance().getMpd().
 		try {
-			Contexte.getInstance().getMpd().getPlaylist().clear();
-		//	music.get
-			Contexte.getInstance().getMpd().getPlaylist().add(music);
-			Contexte.getInstance().getMpd().play();
-			//Contexte.getInstance().getMpd().skipTo(Contexte.getInstance().getMpd().getPlaylist().size());
+
+			int songId = -1;
+			// try to find it in the current playlist first
+
+			Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().find("filename", music.getFullpath());
 			
-		//	Contexte.getInstance().getMpd().play();
+			// not found
+			if (founds.isEmpty()) {
+				songId = Contexte.getInstance().getMpd().getPlaylist().addid(music);
+			} else {
+				// found
+				songId = founds.toArray(new Music[founds.size()])[0].getSongId();
+			}
+			if (songId > -1) {
+				Contexte.getInstance().getMpd().skipTo(songId);
+			}
+			
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
