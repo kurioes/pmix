@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Message;
+import android.text.Layout.Alignment;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -83,6 +84,15 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		try {
 			final MPD mpd = Contexte.getInstance().getMpd();
 			String mpdVersion = mpd.getMpdVersion();
+			
+			((TextView) findViewById(R.id.volume)).setAlignment(Alignment.ALIGN_CENTER);
+			((TextView) findViewById(R.id.volume)).setTextSize(12);
+			((TextView) findViewById(R.id.track)).setAlignment(Alignment.ALIGN_CENTER);
+			((TextView) findViewById(R.id.track)).setTextSize(12);
+			((TextView) findViewById(R.id.trackTime)).setAlignment(Alignment.ALIGN_CENTER);
+			((TextView) findViewById(R.id.trackTime)).setTextSize(12);
+			
+		//	mainInfo.setTextSize(12);
 
 			StringBuffer stringBuffer = new StringBuffer(100);
 
