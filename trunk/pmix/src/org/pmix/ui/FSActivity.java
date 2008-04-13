@@ -30,8 +30,8 @@ public class FSActivity extends ListActivity {
 		items.clear();
 		try {
 
-			if (this.getIntent().getExtra("directory") != null) {
-				currentDirectory = Contexte.getInstance().getMpd().getRootDirectory().makeDirectory((String) this.getIntent().getExtra("directory"));
+			if (this.getIntent().getStringExtra("directory") != null) {
+				currentDirectory = Contexte.getInstance().getMpd().getRootDirectory().makeDirectory((String) this.getIntent().getStringExtra("directory"));
 			} else {
 				currentDirectory = Contexte.getInstance().getMpd().getRootDirectory();
 			}

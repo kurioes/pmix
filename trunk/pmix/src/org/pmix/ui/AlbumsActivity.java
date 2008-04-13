@@ -26,9 +26,9 @@ public class AlbumsActivity extends ListActivity {
 		try {
 			items.clear();
 
-			if (this.getIntent().getExtra("artist") != null) {
-				items.addAll(Contexte.getInstance().getMpd().listAlbums((String) this.getIntent().getExtra("artist")));
-				this.setTitle((String) this.getIntent().getExtra("artist"));
+			if (this.getIntent().getStringExtra("artist") != null) {
+				items.addAll(Contexte.getInstance().getMpd().listAlbums((String) this.getIntent().getStringExtra("artist")));
+				this.setTitle((String) this.getIntent().getStringExtra("artist"));
 			} else {
 				items.addAll(Contexte.getInstance().getMpd().listAlbums());
 			}
@@ -45,7 +45,10 @@ public class AlbumsActivity extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = new Intent(this, SongsActivity.class);
-		intent.putExtra("album", items.get(getSelection()));
+		
+		
+		
+		intent.putExtra("album", items.get(position));
 		startSubActivity(intent, -1);
 	}
 

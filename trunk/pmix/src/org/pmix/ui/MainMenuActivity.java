@@ -28,8 +28,11 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageSwitcher;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.helloandroid.android.horizontalslider.HorizontalSlider;
 
 public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener {
 
@@ -38,6 +41,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	public static final int ARTISTS = 1;
 
 	public static final int SETTINGS = 3;
+	
+	private TextView artistNameText;
+	
+	private TextView songNameText;
+	
+	private TextView albumNameText;
 
 	public static final int ALBUMS = 4;
 
@@ -45,13 +54,15 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private TextView mainInfo = null;
 
-	private ProgressBar progressBar = null;
+	private HorizontalSlider progressBar = null;
 
-	private ProgressBar progressBarTrack = null;
+	private HorizontalSlider progressBarTrack = null;
 
 	private TextView trackTime = null;
 
 	private MyHandler handler;
+
+	private ImageSwitcher coverSwitcher;
 
 	private static final int VOLUME_STEP = 5;
 
@@ -76,58 +87,69 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	private void init() {
 		setContentView(R.layout.main);
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
-		progressBar = (ProgressBar) findViewById(R.id.progress_volume);
-		progressBarTrack = (ProgressBar) findViewById(R.id.progress_track);
+		progressBar = (HorizontalSlider) findViewById(R.id.progress_volume);
+		artistNameText = (TextView) findViewById(R.id.artistName);
+		albumNameText = (TextView) findViewById(R.id.albumName);
+		songNameText = (TextView) findViewById(R.id.songName);
+
+		progressBarTrack = (HorizontalSlider) findViewById(R.id.progress_track);
 
 		trackTime = (TextView) findViewById(R.id.trackTime);
 
 		try {
 			final MPD mpd = Contexte.getInstance().getMpd();
-			String mpdVersion = mpd.getMpdVersion();
+
+			progressBar.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
+
+				@Override
+				public void onProgressChanged(View v, int progress) {
+					try {
+						mpd.setVolume(progress);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+
+				}
+			});
 			
+			progressBarTrack.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
+
+				@Override
+				public void onProgressChanged(View v, int progress) {
+					try {
+						int position = (progress * handler.getCurrentSongTime())/100 ;
+						mpd.seek(position);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+
+				}
+			});
+
+			String mpdVersion = mpd.getMpdVersion();
+
 			((TextView) findViewById(R.id.volume)).setAlignment(Alignment.ALIGN_CENTER);
 			((TextView) findViewById(R.id.volume)).setTextSize(12);
 			((TextView) findViewById(R.id.track)).setAlignment(Alignment.ALIGN_CENTER);
 			((TextView) findViewById(R.id.track)).setTextSize(12);
 			((TextView) findViewById(R.id.trackTime)).setAlignment(Alignment.ALIGN_CENTER);
 			((TextView) findViewById(R.id.trackTime)).setTextSize(12);
-			
-		//	mainInfo.setTextSize(12);
+
+			coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
+
+			handler = new MyHandler(this);
+			coverSwitcher.setFactory(handler);
 
 			StringBuffer stringBuffer = new StringBuffer(100);
 
-			stringBuffer.append("MPD version " + mpdVersion + "\n");
+			stringBuffer.append("\n\n\n\nMPD version " + mpdVersion + "\n");
 			stringBuffer.append("MPD running at " + Settings.getInstance().getServerAddress() + "\n");
 
 			MPDStatusMonitor monitor = new MPDStatusMonitor(mpd, 500);
 			monitor.addStatusChangeListener(this);
 			monitor.addTrackPositionListener(this);
 
-			Button button = (Button) findViewById(R.id.increase_volume);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-					progressBar.incrementProgressBy(VOLUME_STEP);
-					try {
-						mpd.adjustVolume(VOLUME_STEP);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.decrease_volume);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-					progressBar.incrementProgressBy(-VOLUME_STEP);
-					try {
-						mpd.adjustVolume(-VOLUME_STEP);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.next);
+			Button button = (Button) findViewById(R.id.next);
 			button.setOnClickListener(new Button.OnClickListener() {
 				public void onClick(View v) {
 
@@ -185,7 +207,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				}
 			});
 
-			handler = new MyHandler(this);
 			monitor.start();
 
 			mainInfo.setText(stringBuffer.toString());
@@ -197,7 +218,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-	//	mainInfo.setText(keyCode + "");
+		// mainInfo.setText(keyCode + "");
 		try {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
@@ -277,7 +298,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			startSubActivity(i, FILES);
 			return true;
 		default:
-			showAlert("Menu Item Clicked", "Not yet implemented", "ok", null, false, null);
+			// showAlert("Menu Item Clicked", "Not yet implemented", "ok", null,
+			// false, null);
 			return true;
 		}
 
@@ -311,12 +333,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 		MPDStatus status = event.getMpdStatus();
 
-		if (status.getState().equals(MPDStatus.MPD_STATE_PLAYING)) {
+		// if (status.getState().equals(MPDStatus.MPD_STATE_PLAYING)) {
 
-			Message message = Message.obtain();
-			message.obj = status;
-			handler.sendMessage(message);
-		}
+		Message message = Message.obtain();
+		message.obj = status;
+		handler.sendMessage(message);
+		// }
 
 	}
 
@@ -380,7 +402,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		return progressBarTrack;
 	}
 
-	public void setProgressBarTrack(ProgressBar progressBarTrack) {
+	public void setProgressBarTrack(HorizontalSlider progressBarTrack) {
 		this.progressBarTrack = progressBarTrack;
 	}
 
@@ -397,4 +419,20 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		return trackTime;
 	}
 
+	public ImageSwitcher getCoverSwitcher() {
+		return coverSwitcher;
+
+	}
+
+	public TextView getArtistNameText() {
+		return artistNameText;
+	}
+
+	public TextView getSongNameText() {
+		return songNameText;
+	}
+
+	public TextView getAlbumNameText() {
+		return albumNameText;
+	}
 }

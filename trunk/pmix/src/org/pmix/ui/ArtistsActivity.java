@@ -40,7 +40,7 @@ public class ArtistsActivity extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = new Intent(this, AlbumsActivity.class);
-		intent.putExtra("artist", items.get(getSelection()));
+		intent.putExtra("artist", items.get(position));
 		startSubActivity(intent, -1);
 	}
 
