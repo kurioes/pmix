@@ -1,47 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
 
-	<TextView id="@+id/mainInfo" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/app_name" />
 
-	<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
-		<LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="fill_parent">
+	
+		
+	<TextView android:id="@+id/artistName" android:textAlign="center" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text=""
+		android:textSize="25sp"
+		/>	
+		
+		<TextView android:id="@+id/albumName" android:textAlign="center" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="" android:textSize="20sp"/>	
+		
+		<TextView android:id="@+id/songName" android:textAlign="center" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="" />	
+		
+	<ImageSwitcher android:id="@+id/albumCover"
+			android:layout_width="100px"
+			android:layout_height="100px"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentLeft="true" />	
 
-			<TextView id="@+id/volume" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/volume" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:gravity="center"
+		android:layout_height="wrap_content">
 
-			<ProgressBar id="@+id/progress_volume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:max="100" android:progress="0" />
+		<Button android:id="@+id/prev" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/prev" />
+		<Button android:id="@+id/back" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/back" />
+		<Button android:id="@+id/playpause" android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/playpause" />
+		<Button android:id="@+id/forward" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/forward" />
+		<Button android:id="@+id/next" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/next" />
 
-			<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+	</LinearLayout>
+	<TextView android:id="@+id/trackTime" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
 
-				<Button id="@+id/decrease_volume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/progressbar_1_minus" />
+	<LinearLayout android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent">
 
-				<Button id="@+id/increase_volume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/progressbar_1_plus" />
+			<TextView android:id="@+id/track" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:text="@string/track" />
 
-			</LinearLayout>
+			<com.helloandroid.android.horizontalslider.HorizontalSlider  android:id="@+id/progress_track"
+				
+				android:layout_width="250dip"
+				android:layout_height="wrap_content" android:max="100"
+				android:progress="0" />
+
+
 		</LinearLayout>
-		<LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="fill_parent">
+		
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent">
 
-			<TextView id="@+id/track" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/track" />
+			<TextView android:id="@+id/volume"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:text="@string/volume" />
 
-			<ProgressBar id="@+id/progress_track" android:layout_width="wrap_content" android:layout_height="wrap_content" android:max="100" android:progress="0" />
+			<com.helloandroid.android.horizontalslider.HorizontalSlider  android:id="@+id/progress_volume"
+				android:layout_width="250dip"
+				android:indeterminate="false"
+				android:layout_height="wrap_content" android:max="100"
+				android:progress="0" />
 
-
+			
 		</LinearLayout>
+		
 
-
-		<TextView id="@+id/trackTime" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-
-
+		
 
 	</LinearLayout>
 
-	<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
-
-		<Button id="@+id/prev" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/prev" />
-		<Button id="@+id/back" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/back" />
-		<Button id="@+id/playpause" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/playpause" />
-		<Button id="@+id/forward" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/forward" />
-		<Button id="@+id/next" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/next" />
-
-	</LinearLayout>
+<TextView android:id="@+id/mainInfo" android:layout_width="fill_parent"
+		android:textSize="10sp"
+		android:layout_height="wrap_content" android:text="@string/app_name" />
 
 </LinearLayout>

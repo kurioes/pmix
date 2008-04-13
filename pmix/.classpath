@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="jmpdcomm.jar"/>
-	<classpathentry kind="lib" path="/home/remi/android_sdk_linux_m3-rc22a/android.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/home/remi/android_sdk_linux_m3-rc22a/docs/reference"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="jmpdcomm.jar" sourcepath="/JMPDComm"/>
+	<classpathentry kind="lib" path="commons-codec-1.3.jar"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.project.AndroidClasspathContainerInitializer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

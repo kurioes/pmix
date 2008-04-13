@@ -27,7 +27,7 @@ public class SongsActivity extends ListActivity {
 		List<String> items = new ArrayList<String>();
 
 		try {
-			String album = (String) this.getIntent().getExtra("album");
+			String album = (String) this.getIntent().getStringExtra("album");
 			this.setTitle(album);
 			musics = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ALBUM, album));
 
@@ -49,7 +49,7 @@ public class SongsActivity extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
-		Music music = musics.get(getSelection());
+		Music music = musics.get(position);
 		try {
 
 			int songId = -1;

@@ -9,6 +9,8 @@ public class Contexte {
 
 	private static Contexte instance = new Contexte();
 
+	
+	
 	private Contexte() {
 
 	}
