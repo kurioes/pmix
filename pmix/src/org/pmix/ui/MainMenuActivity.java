@@ -41,12 +41,14 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	public static final int ARTISTS = 1;
 
 	public static final int SETTINGS = 3;
-	
+
 	private TextView artistNameText;
-	
+
 	private TextView songNameText;
-	
+
 	private TextView albumNameText;
+
+	private MPDStatusMonitor monitor;
 
 	public static final int ALBUMS = 4;
 
@@ -84,6 +86,18 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		try {
+			if (monitor != null)
+				monitor.setMpd(Contexte.getInstance().getMpd());
+		} catch (MPDServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private void init() {
 		setContentView(R.layout.main);
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
@@ -97,28 +111,28 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		trackTime = (TextView) findViewById(R.id.trackTime);
 
 		try {
-			final MPD mpd = Contexte.getInstance().getMpd();
+			// final MPD mpd = Contexte.getInstance().getMpd();
 
 			progressBar.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
 				@Override
 				public void onProgressChanged(View v, int progress) {
 					try {
-						mpd.setVolume(progress);
+						Contexte.getInstance().getMpd().setVolume(progress);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
 
 				}
 			});
-			
+
 			progressBarTrack.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
 				@Override
 				public void onProgressChanged(View v, int progress) {
 					try {
-						int position = (progress * handler.getCurrentSongTime())/100 ;
-						mpd.seek(position);
+						int position = (progress * handler.getCurrentSongTime()) / 100;
+						Contexte.getInstance().getMpd().seek(position);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -126,7 +140,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				}
 			});
 
-			String mpdVersion = mpd.getMpdVersion();
+			String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
 
 			((TextView) findViewById(R.id.volume)).setAlignment(Alignment.ALIGN_CENTER);
 			((TextView) findViewById(R.id.volume)).setTextSize(12);
@@ -142,10 +156,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 			StringBuffer stringBuffer = new StringBuffer(100);
 
-			stringBuffer.append("\nMPD version " + mpdVersion + "\n");
-			stringBuffer.append("MPD running at " + Settings.getInstance().getServerAddress() + "\n");
+			stringBuffer.append("\nMPD version " + mpdVersion + " running at " + Settings.getInstance().getServerAddress() + "\n");
 
-			MPDStatusMonitor monitor = new MPDStatusMonitor(mpd, 500);
+			monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 500);
 			monitor.addStatusChangeListener(this);
 			monitor.addTrackPositionListener(this);
 
@@ -154,7 +167,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				public void onClick(View v) {
 
 					try {
-						mpd.next();
+						Contexte.getInstance().getMpd().next();
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -165,7 +178,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			button.setOnClickListener(new Button.OnClickListener() {
 				public void onClick(View v) {
 					try {
-						mpd.previous();
+						Contexte.getInstance().getMpd().previous();
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -177,7 +190,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				public void onClick(View v) {
 
 					try {
-						mpd.seek(handler.getLastKnownElapsedTime() - TRACK_STEP);
+						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() - TRACK_STEP);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -189,7 +202,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				public void onClick(View v) {
 
 					try {
-						mpd.pause();
+						Contexte.getInstance().getMpd().pause();
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -200,7 +213,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			button.setOnClickListener(new Button.OnClickListener() {
 				public void onClick(View v) {
 					try {
-						mpd.seek(handler.getLastKnownElapsedTime() + TRACK_STEP);
+						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() + TRACK_STEP);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
