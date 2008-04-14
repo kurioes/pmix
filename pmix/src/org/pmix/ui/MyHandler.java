@@ -1,8 +1,18 @@
 package org.pmix.ui;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.Music;
+import org.pmix.cover.CoverRetriever;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -17,6 +27,8 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 	private long lastKnownElapsedTime;
 
 	private int currentSongTime;
+
+	private String previousAlbum = "";
 
 	public int getCurrentSongTime() {
 		return currentSongTime;
@@ -49,35 +61,32 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 				Music current = org.pmix.settings.Contexte.getInstance().getMpd().getPlaylist().getMusic(songId);
 				if (current != null) {
 
-				//	mainMenuActivity.getMainInfo().setText((current.getArtist() != null ? (current.getArtist() + "\n") : "") + (current.getAlbum() != null ? (current.getAlbum() + "\n") : "") + current.getTitle());
 					mainMenuActivity.getArtistNameText().setText(current.getArtist() != null ? current.getArtist() : "");
 					mainMenuActivity.getAlbumNameText().setText((current.getAlbum() != null ? (current.getAlbum()) : ""));
 					mainMenuActivity.getSongNameText().setText((current.getTitle() != null ? (current.getTitle()) : ""));
 
-					// String album = current.getAlbum();
-					/*
-					 * if (album != null && !previousAlbum.equals(album)) { byte
-					 * data[] =
-					 * org.pmix.settings.Contexte.getInstance().getMpd().getCover(album);
-					 * 
-					 * if (data != null) {
-					 * 
-					 * Drawable drawable = new BitmapDrawable(new
-					 * ByteArrayInputStream(data));
-					 * mainMenuActivity.getCoverSwitcher().setImageDrawable(drawable);
-					 * 
-					 * previousAlbum = album; } }
-					 */
-				} else {
-					mainMenuActivity.getMainInfo().setText(songId + " " + status.getSongId());
+					String album = current.getAlbum();
+
+					if (album != null && !previousAlbum.equals(album) && current.getArtist() != null) {
+						String url = CoverRetriever.getCoverUrl(current.getArtist(), current.getAlbum());
+						if (url != null)
+							downloadFile(url);
+						else
+							mainMenuActivity.getCoverSwitcher().setImageResource(R.drawable.gmpcnocover);
+
+					}
+					if (album == null) {
+						mainMenuActivity.getCoverSwitcher().setImageResource(R.drawable.gmpcnocover);
+					}
+
+					previousAlbum = album;
+
 				}
 			} catch (Exception e) {
-				mainMenuActivity.getMainInfo().setText(songId + "#" + status.getSongId() + " " + e);
 				e.printStackTrace();
 			}
 		} else
-			mainMenuActivity.getMainInfo().setText(songId + "#" + status.getSongId());
-		mainMenuActivity.getProgressBar().setProgress(status.getVolume());
+			mainMenuActivity.getProgressBar().setProgress(status.getVolume());
 
 		if (status.getTotalTime() > 0) {
 			mainMenuActivity.getTrackTime().setText(timeToString(status.getElapsedTime()) + " - " + timeToString(status.getTotalTime()));
@@ -99,5 +108,32 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 		i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 		return i;
+	}
+
+	Bitmap bmImg;
+
+	void downloadFile(String fileUrl) {
+		URL myFileUrl = null;
+		try {
+			myFileUrl = new URL(fileUrl);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
+			conn.setDoInput(true);
+			conn.connect();
+			int length = conn.getContentLength();
+
+			InputStream is = conn.getInputStream();
+
+			bmImg = BitmapFactory.decodeStream(is);
+			// new BitmapDrawable(bmImg);
+			mainMenuActivity.getCoverSwitcher().setImageDrawable(new BitmapDrawable(bmImg));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
