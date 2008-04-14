@@ -85,8 +85,7 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else
-			mainMenuActivity.getProgressBar().setProgress(status.getVolume());
+		}
 
 		if (status.getTotalTime() > 0) {
 			mainMenuActivity.getTrackTime().setText(timeToString(status.getElapsedTime()) + " - " + timeToString(status.getTotalTime()));
@@ -96,7 +95,7 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 
 		lastKnownElapsedTime = status.getElapsedTime();
 		currentSongTime = (int) status.getTotalTime();
-
+		mainMenuActivity.getProgressBar().setProgress(status.getVolume());
 		mainMenuActivity.getProgressBarTrack().setProgress((int) (lastKnownElapsedTime * 100 / status.getTotalTime()));
 	}
 

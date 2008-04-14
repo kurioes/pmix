@@ -142,7 +142,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 			StringBuffer stringBuffer = new StringBuffer(100);
 
-			stringBuffer.append("\n\n\n\nMPD version " + mpdVersion + "\n");
+			stringBuffer.append("\nMPD version " + mpdVersion + "\n");
 			stringBuffer.append("MPD running at " + Settings.getInstance().getServerAddress() + "\n");
 
 			MPDStatusMonitor monitor = new MPDStatusMonitor(mpd, 500);

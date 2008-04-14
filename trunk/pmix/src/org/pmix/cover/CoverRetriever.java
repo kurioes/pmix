@@ -30,7 +30,7 @@ public class CoverRetriever {
 	}
 
 	private static String getURL(String artist, String album) throws UnsupportedEncodingException {
-		return String.format(URL, "com", AMAZON_KEY, urlEncode(artist), "Keywords", urlEncode(album));
+		return String.format(URL, "fr", AMAZON_KEY, urlEncode(artist), "Keywords", urlEncode(album));
 	}
 
 	private static String urlEncode(String a) throws UnsupportedEncodingException {
