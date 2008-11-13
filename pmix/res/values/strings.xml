@@ -18,4 +18,5 @@
 	<string name="forward">&gt;&gt;</string>
 	<string name="progressbar_1_plus">+</string>
 	<string name="progressbar_1_minus">-</string>
+<string name="playlist">Playlist</string>
 </resources>

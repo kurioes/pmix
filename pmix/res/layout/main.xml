@@ -3,45 +3,47 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:gravity="center">
 
-
-	
-		
-	<TextView android:id="@+id/artistName" android:textAlign="center" android:layout_width="fill_parent"
+	<TextView android:id="@+id/artistName" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text=""
 		android:textSize="25sp"
 		/>	
 		
-		<TextView android:id="@+id/albumName" android:textAlign="center" android:layout_width="fill_parent"
+		<TextView android:id="@+id/albumName" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="" android:textSize="20sp"/>	
 		
-		<TextView android:id="@+id/songName" android:textAlign="center" android:layout_width="fill_parent"
+		<TextView android:id="@+id/songName" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="" />	
-		
-
 		
 	<ImageSwitcher android:id="@+id/albumCover"
 			android:layout_width="150px"
 			android:layout_height="150px"
 			android:padding="10px"
 			android:layout_alignParentTop="true"
-			android:layout_alignParentLeft="true" />	
-
+			android:layout_alignParentLeft="true" />
+<!-- By sag
+	 
+	<ProgressBar android:id="@+id/albumCoverProgress"
+			android:layout_width="150px"
+			android:layout_height="150px"
+			android:padding="10px"
+			android:visible="false"
+			android:layout_alignParentTop="@+id/albumCover" />	
+ -->
 	<LinearLayout android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:gravity="center"
 		android:layout_height="wrap_content">
 
-		<Button android:id="@+id/prev" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/prev" />
-		<Button android:id="@+id/back" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/back" />
-		<Button android:id="@+id/playpause" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/playpause" />
-		<Button android:id="@+id/forward" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/forward" />
-		<Button android:id="@+id/next" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/next" />
+		<ImageButton android:id="@+id/prev" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:src="@android:drawable/ic_media_previous"/>
+		<ImageButton android:id="@+id/back" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:src="@android:drawable/ic_media_rew"/>
+		<ImageButton android:id="@+id/playpause" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:src="@android:drawable/ic_media_play"/>
+		<ImageButton android:id="@+id/forward" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:src="@android:drawable/ic_media_ff"/>
+		<ImageButton android:id="@+id/next" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:src="@android:drawable/ic_media_next"/>
 
 	</LinearLayout>
 	<TextView android:id="@+id/trackTime" android:layout_width="wrap_content"
@@ -60,7 +62,7 @@
 			<TextView android:id="@+id/track" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:text="@string/track" />
 
-			<com.helloandroid.android.horizontalslider.HorizontalSlider  android:id="@+id/progress_track"
+			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_track"
 				
 				android:layout_width="250dip"
 				android:layout_height="wrap_content" android:max="100"
@@ -78,7 +80,7 @@
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:text="@string/volume" />
 
-			<com.helloandroid.android.horizontalslider.HorizontalSlider  android:id="@+id/progress_volume"
+			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_volume"
 				android:layout_width="250dip"
 				android:indeterminate="false"
 				android:layout_height="wrap_content" android:max="100"
@@ -87,9 +89,6 @@
 			
 		</LinearLayout>
 		
-
-		
-
 	</LinearLayout>
 
 <TextView android:id="@+id/mainInfo" android:layout_width="fill_parent"

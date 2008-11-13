@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.a0z.mpd.MPDServerException;
-import org.pmix.settings.Contexte;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -33,7 +32,7 @@ public class AlbumsActivity extends ListActivity {
 				items.addAll(Contexte.getInstance().getMpd().listAlbums());
 			}
 
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, R.layout.artist_row, items);
+			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 			setListAdapter(notes);
 		} catch (MPDServerException e) {
 			e.printStackTrace();
@@ -46,10 +45,10 @@ public class AlbumsActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = new Intent(this, SongsActivity.class);
 		
-		
-		
 		intent.putExtra("album", items.get(position));
-		startSubActivity(intent, -1);
+		//startActivity(intent);
+		startActivityForResult(intent, -1);
+		//startSubActivity(intent, -1);
 	}
 
 }
