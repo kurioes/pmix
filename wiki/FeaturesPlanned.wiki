@@ -16,3 +16,4 @@ PMix is still in early development phase... There are several features we would 
   * Nicer browsing for Artists/Albums (equal to Android Music Player)
   * Choose Output 
   * Add more than one MPD-Server
+  * Connect only when WLAN is on (PMix is useless over internet, right?)
