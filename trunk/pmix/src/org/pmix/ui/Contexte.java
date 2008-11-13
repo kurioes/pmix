@@ -1,21 +1,22 @@
 package org.pmix.ui;
 
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
-import dalvik.system.VMStack;
-
+/**
+ * Holds the JMPDComm object
+ * @author Rémi Flament, Stefan Agner
+ * @version $Id:  $
+ */
 public class Contexte {
 
 	private MPD mpd = new MPD();
 	private String serverAddress = "";
+	private int serverPort = 6600;
+	private String serverPassword = "";
 	private static Contexte instance = new Contexte();
 
 	private Logger myLogger = Logger.global;
@@ -23,7 +24,6 @@ public class Contexte {
 	
 	
 	private Contexte() {
-
 	}
 
 	public static Contexte getInstance() {
@@ -43,10 +43,11 @@ public class Contexte {
 	}
 
 	public MPD getMpd() throws MPDServerException {
-
 		if (!mpd.isConnected()) {
 			myLogger.log(Level.WARNING, "Opening Connection...");
-			mpd.connect(getServerAddress());
+			mpd.connect(getServerAddress(),getServerPort());
+			if(!getServerPassword().equals(""))
+				mpd.password(getServerPassword());
 		}
 		return mpd;
 	}
@@ -58,6 +59,22 @@ public class Contexte {
 
 	public String getServerAddress() {
 		return serverAddress;
+	}
+
+	public void setServerPort(int serverPort) {
+		this.serverPort = serverPort;
+	}
+
+	public int getServerPort() {
+		return serverPort;
+	}
+
+	public void setServerPassword(String serverPassword) {
+		this.serverPassword = serverPassword;
+	}
+
+	public String getServerPassword() {
+		return serverPassword;
 	}
 
 }
