@@ -1,0 +1,12 @@
+#summary Developer KnowHow Page
+
+= Introduction =
+
+This page should contain Links and short How-Tos for developers. There should be links which are used while developing...
+
+
+= Details =
+
+== General ==
+  * Android Documentation: [[http://code.google.com/android/documentation.html]]
+  * Activity Lifecycle: [[http://code.google.com/android/reference/android/app/Activity.html#ActivityLifecycle]]
