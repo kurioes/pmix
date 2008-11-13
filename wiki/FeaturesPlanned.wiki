@@ -1,0 +1,18 @@
+#summary Planned features for PMix
+
+= Introduction =
+PMix is still in early development phase... There are several features we would like to implement.
+
+= Planned features for 0.3 =
+  * Update to Android API 1.0 *done by sag*
+  * Nicer Artwork (Menu/Buttons on Main Screen) *done by sag*
+  * Browse Playlist *partly done by bpo, merge needed*
+  * Settings with Android API Preferences
+  * Release on Android Market (Account opened by sag)
+  * Stability! *partly done by sag/bpo*
+  * Add Licence notice to source files
+
+= Planned features for further releases =
+  * Nicer browsing for Artists/Albums (equal to Android Music Player)
+  * Choose Output 
+  * Add more than one MPD-Server
