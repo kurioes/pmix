@@ -7,7 +7,6 @@ import java.util.List;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
-import org.pmix.settings.Contexte;
 
 import android.app.ListActivity;
 import android.os.Bundle;
@@ -37,7 +36,7 @@ public class SongsActivity extends ListActivity {
 
 			// items.addAll(Contexte.getInstance().getMpd()..listAlbums(artist));
 
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, R.layout.artist_row, items);
+			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 			setListAdapter(notes);
 		} catch (MPDServerException e) {
 			e.printStackTrace();
@@ -55,15 +54,16 @@ public class SongsActivity extends ListActivity {
 			int songId = -1;
 			// try to find it in the current playlist first
 
-			Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().find("filename", music.getFullpath());
+			//Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().find("filename", music.getFullpath());
 			
 			// not found
-			if (founds.isEmpty()) {
-				songId = Contexte.getInstance().getMpd().getPlaylist().addid(music);
-			} else {
+			//if (founds.isEmpty()) {
+				//songId = 
+				Contexte.getInstance().getMpd().getPlaylist().add(music);
+			//} else {
 				// found
-				songId = founds.toArray(new Music[founds.size()])[0].getSongId();
-			}
+			//	songId = founds.toArray(new Music[founds.size()])[0].getSongId();
+			//}
 			if (songId > -1) {
 				Contexte.getInstance().getMpd().skipTo(songId);
 			}

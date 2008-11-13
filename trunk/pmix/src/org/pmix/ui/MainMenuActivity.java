@@ -1,5 +1,8 @@
 package org.pmix.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.MPDStatus;
@@ -15,32 +18,36 @@ import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
 import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
-import org.pmix.settings.Contexte;
-import org.pmix.settings.Settings;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Message;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.text.Layout.Alignment;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.helloandroid.android.horizontalslider.HorizontalSlider;
-
-public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener {
+public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener, OnSharedPreferenceChangeListener {
 
 	public static final String PREFS_NAME = "pmix.properties";
 
-	public static final int ARTISTS = 1;
+	public static final int PLAYLIST = 1;
+	
+	public static final int ARTISTS = 2;
 
-	public static final int SETTINGS = 3;
+	public static final int SETTINGS = 5;
 
 	private TextView artistNameText;
 
@@ -52,7 +59,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public static final int ALBUMS = 4;
 
-	public static final int FILES = 5;
+	public static final int FILES = 3;
 
 	private TextView mainInfo = null;
 
@@ -66,15 +73,15 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private ImageSwitcher coverSwitcher;
 
+	private ProgressBar coverSwitcherProgress;
+
 	private static final int VOLUME_STEP = 5;
 
 	private static final int TRACK_STEP = 10;
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, String data, Bundle extras) {
-
-		super.onActivityResult(requestCode, resultCode, data, extras);
-
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case SETTINGS:
 			init();
@@ -89,17 +96,23 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		try {
-			if (monitor != null)
-				monitor.setMpd(Contexte.getInstance().getMpd());
+			monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
+			monitor.addStatusChangeListener(this);
+			monitor.addTrackPositionListener(this);
+			monitor.start();
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		
 	}
 
 	private void init() {
 		setContentView(R.layout.main);
+		
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
 		progressBar = (HorizontalSlider) findViewById(R.id.progress_volume);
 		artistNameText = (TextView) findViewById(R.id.artistName);
@@ -111,7 +124,99 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		trackTime = (TextView) findViewById(R.id.trackTime);
 
 		try {
-			// final MPD mpd = Contexte.getInstance().getMpd();
+
+			// Initial Connect => Set Host (TODO: fix, this is ugly)
+
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
+			settings.registerOnSharedPreferenceChangeListener(this);
+			String serverAddress = settings.getString("hostname", "");
+			Contexte.getInstance().setServerAddress(serverAddress);
+			String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
+
+			((TextView) findViewById(R.id.volume)).setTextSize(12);
+			((TextView) findViewById(R.id.track)).setTextSize(12);
+			((TextView) findViewById(R.id.trackTime)).setTextSize(12);
+
+			coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
+			/*
+			coverSwitcherProgress = (ProgressBar) findViewById(R.id.albumCoverProgress); 
+			coverSwitcherProgress.setIndeterminate(true);
+			coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
+			*/
+			handler = new MyHandler(this);
+			coverSwitcher.setFactory(handler);
+
+			StringBuffer stringBuffer = new StringBuffer(100);
+			
+			String serverAdress = settings.getString("hostname", "");
+			stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
+			
+			org.pmix.ui.Contexte.getInstance().getMpd().getPlaylist().refresh();
+			
+			monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
+			monitor.addStatusChangeListener(this);
+			monitor.addTrackPositionListener(this);
+
+			ImageButton button = (ImageButton) findViewById(R.id.next);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+
+					try {
+						Contexte.getInstance().getMpd().next();
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			button = (ImageButton) findViewById(R.id.prev);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+					try {
+						Contexte.getInstance().getMpd().previous();
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			button = (ImageButton) findViewById(R.id.back);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+
+					try {
+						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() - TRACK_STEP);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			button = (ImageButton) findViewById(R.id.playpause);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+
+					try {
+						if(Contexte.getInstance().getMpd().getStatus().getState() == Contexte.getInstance().getMpd().getStatus().MPD_STATE_PLAYING)
+							Contexte.getInstance().getMpd().pause();
+						else
+							Contexte.getInstance().getMpd().play();
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			button = (ImageButton) findViewById(R.id.forward);
+			button.setOnClickListener(new Button.OnClickListener() {
+				public void onClick(View v) {
+					try {
+						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() + TRACK_STEP);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+			});
 
 			progressBar.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
@@ -125,7 +230,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 				}
 			});
-
 			progressBarTrack.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
 				@Override
@@ -139,94 +243,17 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 				}
 			});
-
-			String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
-
-			((TextView) findViewById(R.id.volume)).setAlignment(Alignment.ALIGN_CENTER);
-			((TextView) findViewById(R.id.volume)).setTextSize(12);
-			((TextView) findViewById(R.id.track)).setAlignment(Alignment.ALIGN_CENTER);
-			((TextView) findViewById(R.id.track)).setTextSize(12);
-			((TextView) findViewById(R.id.trackTime)).setAlignment(Alignment.ALIGN_CENTER);
-			((TextView) findViewById(R.id.trackTime)).setTextSize(12);
-
-			coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
-
-			handler = new MyHandler(this);
-			coverSwitcher.setFactory(handler);
-
-			StringBuffer stringBuffer = new StringBuffer(100);
-
-			stringBuffer.append("\nMPD version " + mpdVersion + " running at " + Settings.getInstance().getServerAddress() + "\n");
-
-			monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 500);
-			monitor.addStatusChangeListener(this);
-			monitor.addTrackPositionListener(this);
-
-			Button button = (Button) findViewById(R.id.next);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-
-					try {
-						Contexte.getInstance().getMpd().next();
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.prev);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-					try {
-						Contexte.getInstance().getMpd().previous();
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.back);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-
-					try {
-						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() - TRACK_STEP);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.playpause);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-
-					try {
-						Contexte.getInstance().getMpd().pause();
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			button = (Button) findViewById(R.id.forward);
-			button.setOnClickListener(new Button.OnClickListener() {
-				public void onClick(View v) {
-					try {
-						Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() + TRACK_STEP);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-
+			
 			monitor.start();
-
 			mainInfo.setText(stringBuffer.toString());
 
 		} catch (MPDServerException e) {
 			this.setTitle("Error");
+
+			
+			mainInfo.setText(e.getMessage());
 		}
+		
 	}
 
 	@Override
@@ -262,13 +289,13 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		if (settings.getAll().get("serverAddress") == null) {
-			this.startSubActivity(new Intent(this, SettingsActivity.class), SETTINGS);
+		
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
+		if (settings.getString("hostname", "").equals("")) {
+			this.startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS);
 		}
-		// Settings.getInstance().setServerAddress(set)
-		else {
+		else 
+		{
 			init();
 		}
 
@@ -277,38 +304,40 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
-		menu.add(0, ARTISTS, R.string.artists);
-		menu.add(2, ALBUMS, R.string.albums);
-		menu.add(3, FILES, R.string.files);
-		menu.add(5, SETTINGS, R.string.settings);
+		menu.add(0,ARTISTS, 0, R.string.artists).setIcon(R.drawable.ic_menu_pmix_artists);
+		menu.add(0,ALBUMS, 1, R.string.albums).setIcon(R.drawable.ic_menu_pmix_albums);
+		menu.add(0,FILES, 2, R.string.files).setIcon(android.R.drawable.ic_menu_agenda);
+		menu.add(0,PLAYLIST, 3, R.string.playlist).setIcon(R.drawable.ic_menu_pmix_playlist);
+		menu.add(0,SETTINGS, 4, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+		
 		return result;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(Menu.Item item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		Intent i = null;
-
-		switch (item.getId()) {
+		
+		switch (item.getItemId()) {
 
 		case ARTISTS:
 
 			i = new Intent(this, ArtistsActivity.class);
-			startSubActivity(i, ARTISTS);
+			startActivityForResult(i, ARTISTS);
 			return true;
 		case ALBUMS:
 
 			i = new Intent(this, AlbumsActivity.class);
-			startSubActivity(i, ALBUMS);
+			startActivityForResult(i, ALBUMS);
 			return true;
 		case FILES:
 
 			i = new Intent(this, FSActivity.class);
-			startSubActivity(i, FILES);
+			startActivityForResult(i, FILES);
 			return true;
 		case SETTINGS:
 			i = new Intent(this, SettingsActivity.class);
-			startSubActivity(i, FILES);
+			startActivityForResult(i, SETTINGS);
 			return true;
 		default:
 			// showAlert("Menu Item Clicked", "Not yet implemented", "ok", null,
@@ -338,8 +367,29 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void stateChanged(MPDStateChangedEvent event) {
-		// TODO Auto-generated method stub
-
+		
+		if(event.getMpdStatus().getState().equals(event.getMpdStatus().MPD_STATE_PLAYING))
+		{
+			this.runOnUiThread(new Runnable(){
+				@Override
+				public void run() {
+					ImageButton button = (ImageButton) findViewById(R.id.playpause);
+					button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
+					
+				}
+			});
+		}
+		else
+		{
+			this.runOnUiThread(new Runnable(){
+				@Override
+				public void run() {
+					ImageButton button = (ImageButton) findViewById(R.id.playpause);
+					button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+					
+				}
+			});
+		}
 	}
 
 	public void trackChanged(MPDTrackChangedEvent event) {
@@ -377,28 +427,35 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	protected void onDestroy() {
 		super.onDestroy();
 		Contexte.getInstance().disconnect();
-		savePreferences();
 	}
-
+/*
 	@Override
-	protected void onFreeze(Bundle outState) {
+	
+	protected void onFreeze(MainMenuActivity outState) {
 		super.onFreeze(outState);
 		Contexte.getInstance().disconnect();
 	}
-
+*/
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Contexte.getInstance().disconnect();
+		if(monitor != null)
+			monitor.stop();
+		monitor = null;
+		
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Contexte.getInstance().disconnect();
-		savePreferences();
-	}
 
+		Contexte.getInstance().disconnect();
+		//monitor.stop();
+		//monitor = null;
+		//Contexte.getInstance().disconnect();
+		//savePreferences();
+	}
+/*
 	private void savePreferences() {
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		SharedPreferences.Editor editor = settings.edit();
@@ -406,7 +463,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 		editor.commit();
 	}
-
+*/
 	public ProgressBar getProgressBar() {
 		return progressBar;
 	}
@@ -447,5 +504,19 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public TextView getAlbumNameText() {
 		return albumNameText;
+	}
+
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences arg0, String arg1) {
+		if(arg0.contains("hostname"))
+		{
+			Contexte.getInstance().setServerAddress(arg0.getString("hostname", ""));
+		}
+		
+	}
+
+	public ProgressBar getCoverSwitcherProgress() {
+		return coverSwitcherProgress;
 	}
 }

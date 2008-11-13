@@ -17,7 +17,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.ViewSwitcher;
 
 public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
@@ -55,10 +57,8 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 		int songId = status.getSongPos();
 		if (songId >= 0) {
 			try {
-
-				org.pmix.settings.Contexte.getInstance().getMpd().getPlaylist().refresh();
-
-				Music current = org.pmix.settings.Contexte.getInstance().getMpd().getPlaylist().getMusic(songId);
+				
+				Music current = org.pmix.ui.Contexte.getInstance().getMpd().getPlaylist().getMusic(songId);
 				if (current != null) {
 
 					mainMenuActivity.getArtistNameText().setText(current.getArtist() != null ? current.getArtist() : "");
@@ -70,7 +70,13 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 					if (album != null && !previousAlbum.equals(album) && current.getArtist() != null) {
 						String url = CoverRetriever.getCoverUrl(current.getArtist(), current.getAlbum());
 						if (url != null)
-							downloadFile(url);
+						{
+							// Show loading...
+							//mainMenuActivity.getCoverSwitcher().setImageResource(R.drawable.gmpcnocover);
+							//mainMenuActivity.getCoverSwitcher().setVisibility(ImageSwitcher.INVISIBLE);
+							//mainMenuActivity.getCoverSwitcherProgress().setVisibility(ProgressBar.VISIBLE);
+							new CoverDownloader(url);
+						}
 						else
 							mainMenuActivity.getCoverSwitcher().setImageResource(R.drawable.gmpcnocover);
 
@@ -104,35 +110,63 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 
 		i.setBackgroundColor(0x00FF0000);
 		i.setScaleType(ImageView.ScaleType.FIT_CENTER);
-		i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		//i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
+		
 		return i;
 	}
 
-	Bitmap bmImg;
-
-	void downloadFile(String fileUrl) {
-		URL myFileUrl = null;
-		try {
-			myFileUrl = new URL(fileUrl);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	/**
+	 * Cover downloader Thread
+	 * @author Stefan Agner
+	 *
+	 */
+	class CoverDownloader extends Thread {
+		private String fileUrl;
+		Bitmap bmImg;
+		public CoverDownloader(String fileUrl)
+		{
+			this.fileUrl = fileUrl;
+			this.start();
 		}
-		try {
-			HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
-			conn.setDoInput(true);
-			conn.connect();
-			int length = conn.getContentLength();
+		
+		public void run()
+		{
+			downloadFile(fileUrl);
+		}
+		void downloadFile(String fileUrl) {
+			URL myFileUrl = null;
+			try {
+				myFileUrl = new URL(fileUrl);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
+				conn.setDoInput(true);
+				conn.connect();
+				int length = conn.getContentLength();
+	
+				InputStream is = conn.getInputStream();
+	
+				bmImg = BitmapFactory.decodeStream(is);
+				// new BitmapDrawable(bmImg);
 
-			InputStream is = conn.getInputStream();
-
-			bmImg = BitmapFactory.decodeStream(is);
-			// new BitmapDrawable(bmImg);
-			mainMenuActivity.getCoverSwitcher().setImageDrawable(new BitmapDrawable(bmImg));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				mainMenuActivity.runOnUiThread(new Runnable(){
+					@Override
+					public void run() {
+						mainMenuActivity.getCoverSwitcher().setVisibility(ImageSwitcher.VISIBLE);
+						//mainMenuActivity.getCoverSwitcherProgress().setVisibility(ProgressBar.INVISIBLE);
+						/*mainMenuActivity.getCurrentFocus().requestLayout();
+						mainMenuActivity.getCurrentFocus().invalidate();*/
+						mainMenuActivity.getCoverSwitcher().setImageDrawable(new BitmapDrawable(bmImg));
+					}
+				});
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }
