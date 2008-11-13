@@ -22,6 +22,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ViewSwitcher;
 
+
+/**
+ * Handels the events from MPDStatusMonitor
+ * @author Rémi Flament, Stefan Agner
+ * @version $Id:  $
+ */
 public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 
 	private MainMenuActivity mainMenuActivity = null;
