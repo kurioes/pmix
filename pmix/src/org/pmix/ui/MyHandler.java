@@ -93,16 +93,19 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 			}
 		}
 
+		lastKnownElapsedTime = status.getElapsedTime();
 		if (status.getTotalTime() > 0) {
 			mainMenuActivity.getTrackTime().setText(timeToString(status.getElapsedTime()) + " - " + timeToString(status.getTotalTime()));
+			mainMenuActivity.getProgressBarTrack().setEnabled(true);
+			mainMenuActivity.getProgressBarTrack().setProgress((int) (lastKnownElapsedTime * 100 / status.getTotalTime()));
 		} else {
 			mainMenuActivity.getTrackTime().setText("");
+			mainMenuActivity.getProgressBarTrack().setEnabled(false);
+			mainMenuActivity.getProgressBarTrack().setProgress(0);
 		}
-
-		lastKnownElapsedTime = status.getElapsedTime();
-		currentSongTime = (int) status.getTotalTime();
 		mainMenuActivity.getProgressBar().setProgress(status.getVolume());
-		mainMenuActivity.getProgressBarTrack().setProgress((int) (lastKnownElapsedTime * 100 / status.getTotalTime()));
+
+		currentSongTime = (int) status.getTotalTime();
 	}
 
 	public View makeView() {
@@ -154,7 +157,7 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 				// new BitmapDrawable(bmImg);
 
 				mainMenuActivity.runOnUiThread(new Runnable(){
-					@Override
+//					@Override
 					public void run() {
 						mainMenuActivity.getCoverSwitcher().setVisibility(ImageSwitcher.VISIBLE);
 						//mainMenuActivity.getCoverSwitcherProgress().setVisibility(ProgressBar.INVISIBLE);
