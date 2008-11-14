@@ -16,6 +16,7 @@
              android:key="password"  
              android:title="Password"
              android:defaultValue=""
+             android:password="true"
              android:summary="Password for the Server" /> 
              />  
      </PreferenceCategory>  
