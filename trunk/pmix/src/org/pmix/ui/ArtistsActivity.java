@@ -78,15 +78,10 @@ public class ArtistsActivity extends ListActivity {
 		}.setArtist(artist));
 	}
 
-	/*
-	 * @author slubman
-	 *  This Override appear as an error in eclipse
-	@Override
-	*/
-	public boolean onItemLongClick(AdapterView<?> arg0, View v, int position, long id) {
-		Intent intent = new Intent(this, AlbumsActivity.class);
-		intent.putExtra("artist", items.get(position));
-		startActivityForResult(intent, -1);
-		return false;
-	}
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+            Intent intent = new Intent(this, AlbumsActivity.class);
+            intent.putExtra("artist", items.get(position));
+            startActivityForResult(intent, -1);
+    }
 }
