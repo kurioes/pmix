@@ -159,11 +159,14 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		Contexte.getInstance().setServerPassword(settings.getString("password", ""));
 		
 		
-
-		((TextView) findViewById(R.id.volume)).setTextSize(12);
+		/*
+		 * @author slubman
+		 * I've set those values in the main.xml, shouldn't we remove those calls?
+		 */
+/*		((TextView) findViewById(R.id.volume)).setTextSize(12);
 		((TextView) findViewById(R.id.track)).setTextSize(12);
 		((TextView) findViewById(R.id.trackTime)).setTextSize(12);
-
+*/
 		coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
 		/* sag, would like to implement a loading Progress
 		coverSwitcherProgress = (ProgressBar) findViewById(R.id.albumCoverProgress); 
@@ -235,7 +238,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		 */
 		button.setOnLongClickListener(new Button.OnLongClickListener() {
 
+			/*
+			 * @author slubman
+			 *  This Override appear as an error in eclipse
 			@Override
+			*/
 			public boolean onLongClick(View v) {
 				try {
 					Contexte.getInstance().getMpd().stop();
@@ -261,7 +268,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 		progressBar.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
+			/*
+			 * @author slubman
+			 *  This Override appear as an error in eclipse
 			@Override
+			*/
 			public void onProgressChanged(View v, int progress) {
 				try {
 					Contexte.getInstance().getMpd().setVolume(progress);
@@ -273,7 +284,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		});
 		progressBarTrack.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
 
+			/*
+			 * @author slubman
+			 *  This Override appear as an error in eclipse
 			@Override
+			*/
 			public void onProgressChanged(View v, int progress) {
 				try {
 					int position = (progress * handler.getCurrentSongTime()) / 100;
@@ -408,7 +423,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
 			{
 				this.runOnUiThread(new Runnable(){
+					/*
+					 * @author slubman
+					 *  This Override appear as an error in eclipse
 					@Override
+					*/
 					public void run() {
 						ImageButton button = (ImageButton) findViewById(R.id.playpause);
 						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
@@ -419,7 +438,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			else
 			{
 				this.runOnUiThread(new Runnable(){
+					/*
+					 * @author slubman
+					 *  This Override appear as an error in eclipse
 					@Override
+					*/
 					public void run() {
 						ImageButton button = (ImageButton) findViewById(R.id.playpause);
 						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
@@ -530,7 +553,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 
+	/*
+	 * @author slubman
+	 *  This Override appear as an error in eclipse
 	@Override
+	*/
 	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
 		if(settings.contains("hostname") || settings.contains("port") || settings.contains("password"))
 		{
