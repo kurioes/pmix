@@ -17,3 +17,4 @@ PMix is still in early development phase... There are several features we would 
   * Choose Output 
   * Add more than one MPD-Server
   * Connect only when WLAN is on (PMix is useless over internet, right?)
+  * Type Safety (mainly in JMPDComm)
