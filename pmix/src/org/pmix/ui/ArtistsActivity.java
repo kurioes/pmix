@@ -74,7 +74,11 @@ public class ArtistsActivity extends ListActivity implements OnItemLongClickList
 	}
 	
 
+	/*
+	 * @author slubman
+	 *  This Override appear as an error in eclipse
 	@Override
+	*/
 	public boolean onItemLongClick(AdapterView<?> arg0, View v, int position, long id) {
 		Intent intent = new Intent(this, AlbumsActivity.class);
 		intent.putExtra("artist", items.get(position));

@@ -47,7 +47,7 @@
 
 	</LinearLayout>
 	<TextView android:id="@+id/trackTime" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
+		android:layout_height="wrap_content" android:textSize="12sp"/>
 
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent"
@@ -60,7 +60,7 @@
 			android:layout_height="fill_parent">
 
 			<TextView android:id="@+id/track" android:layout_width="fill_parent"
-				android:layout_height="wrap_content" android:text="@string/track" android:gravity="center"/>
+				android:layout_height="wrap_content" android:text="@string/track" android:gravity="center" android:textSize="12sp"/>
 
 			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_track"
 				
@@ -78,7 +78,7 @@
 
 			<TextView android:id="@+id/volume"
 				android:layout_width="fill_parent"
-				android:layout_height="wrap_content" android:text="@string/volume" android:gravity="center"/>
+				android:layout_height="wrap_content" android:text="@string/volume" android:gravity="center" android:textSize="12sp"/>
 
 			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_volume"
 				android:layout_width="250dip"
