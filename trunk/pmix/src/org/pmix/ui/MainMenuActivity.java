@@ -33,6 +33,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
@@ -212,14 +213,39 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			public void onClick(View v) {
 
 				try {
-					if(Contexte.getInstance().getMpd().getStatus().getState() == Contexte.getInstance().getMpd().getStatus().MPD_STATE_PLAYING)
+					/**
+					 * If playing or paused, just toggle state, otherwise start playing.
+					 * @author slubman
+					 */
+					if(Contexte.getInstance().getMpd().getStatus().getState().equals(MPDStatus.MPD_STATE_PLAYING)
+						|| Contexte.getInstance().getMpd().getStatus().getState().equals(MPDStatus.MPD_STATE_PAUSED)) {
 						Contexte.getInstance().getMpd().pause();
-					else
+					} else {
 						Contexte.getInstance().getMpd().play();
+					}
 				} catch (MPDServerException e) {
 					e.printStackTrace();
 				}
 			}
+		});
+		
+		/**
+		 * Add the ability to stop playing (may be useful for streams)
+		 * @author slubman
+		 */
+		button.setOnLongClickListener(new Button.OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				try {
+					Contexte.getInstance().getMpd().stop();
+				} catch (MPDServerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return true;
+			}
+			
 		});
 
 		button = (ImageButton) findViewById(R.id.forward);
@@ -379,7 +405,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		{
 			// In some cases state is null (disconnect from server or somewhat similar...)
 			// In my opinion its not how JMPDComm should behave, so we may have to fix it there...
-			if(state.equals(status.MPD_STATE_PLAYING))
+			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
 			{
 				this.runOnUiThread(new Runnable(){
 					@Override
