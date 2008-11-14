@@ -11,6 +11,7 @@ This page should contain Links and short How-Tos for developers. There should be
   * Android Documentation: [http://code.google.com/android/documentation.html]
   * Activity Lifecycle: [http://code.google.com/android/reference/android/app/Activity.html#ActivityLifecycle]
   * JMPDComm (MPD-Client-Library used in PMix) [http://mpd.wikia.com/wiki/ClientLib:JMPDComm]
+  * Android Layouts: [http://www.it.usyd.edu.au/~massad/project-android.html], [http://www.jsharkey.org/blog/2008/02/14/android-tabhost-in-the-m5-sdk/]
 
 
 == Artwork ==
