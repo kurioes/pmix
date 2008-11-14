@@ -49,10 +49,13 @@ public final class R {
         public static final int settings=0x7f030005;
     }
     public static final class string {
+        public static final int addAlbum=0x7f040012;
+        public static final int addArtist=0x7f040013;
         public static final int albums=0x7f040004;
         public static final int app_name=0x7f040000;
         public static final int artists=0x7f040001;
         public static final int back=0x7f04000d;
+        public static final int clear=0x7f040015;
         public static final int files=0x7f040003;
         public static final int forward=0x7f04000e;
         public static final int next=0x7f04000c;
@@ -63,6 +66,7 @@ public final class R {
         public static final int prev=0x7f04000a;
         public static final int progressbar_1_minus=0x7f040010;
         public static final int progressbar_1_plus=0x7f04000f;
+        public static final int removeSong=0x7f040014;
         public static final int serverAddress=0x7f040009;
         public static final int settings=0x7f040005;
         public static final int track=0x7f040007;

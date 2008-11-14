@@ -386,6 +386,10 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			i = new Intent(this, SettingsActivity.class);
 			startActivityForResult(i, SETTINGS);
 			return true;
+		case PLAYLIST:
+			i = new Intent(this, PlaylistActivity.class);
+			startActivityForResult(i, PLAYLIST);
+			return true;
 		default:
 			// showAlert("Menu Item Clicked", "Not yet implemented", "ok", null,
 			// false, null);

@@ -19,4 +19,9 @@
 	<string name="progressbar_1_plus">+</string>
 	<string name="progressbar_1_minus">-</string>
 <string name="playlist">Playlist</string>
+
+<string name="addAlbum">Add Album</string>
+<string name="addArtist">Add Artist</string>
+<string name="removeSong">Remove Song</string>
+<string name="clear">Clear</string>
 </resources>

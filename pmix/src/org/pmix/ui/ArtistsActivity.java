@@ -3,7 +3,9 @@ package org.pmix.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
+import org.a0z.mpd.Music;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -17,7 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-public class ArtistsActivity extends ListActivity implements OnItemLongClickListener {
+public class ArtistsActivity extends ListActivity {
 
 	private List<String> items = new ArrayList<String>();
 
@@ -47,32 +49,34 @@ public class ArtistsActivity extends ListActivity implements OnItemLongClickList
 		registerForContextMenu(list);
 		
 
-	}	
+	}
+	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 		String artist = (String) this.getListView().getItemAtPosition(info.position);
 
 		menu.setHeaderTitle(artist);
-		MenuItem addArtist = menu.add("Add Artist");
+		MenuItem addArtist = menu.add(R.string.addArtist);
 		addArtist.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			private String artist;
 			public boolean onMenuItemClick(MenuItem item) {
-				
+				try {
+					ArrayList<Music> songs = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ARTIST, artist));
+					Contexte.getInstance().getMpd().getPlaylist().add(songs);
+				} catch (MPDServerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return true;
 			}
-		});
-
-
-
+			public OnMenuItemClickListener setArtist(String artist)
+			{
+				this.artist = artist;
+				return this;
+			}
+		}.setArtist(artist));
 	}
-	
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Intent intent = new Intent(this, AlbumsActivity.class);
-		intent.putExtra("artist", items.get(position));
-		startActivityForResult(intent, -1);
-	}
-	
 
 	/*
 	 * @author slubman
@@ -85,6 +89,4 @@ public class ArtistsActivity extends ListActivity implements OnItemLongClickList
 		startActivityForResult(intent, -1);
 		return false;
 	}
-
-
 }

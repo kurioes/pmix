@@ -37,13 +37,11 @@ public class FSActivity extends ListActivity {
 			currentDirectory.refreshData();
 
 			Collection<Directory> directories = currentDirectory.getDirectories();
-
 			for (Directory child : directories) {
 				items.add(child.getName());
 			}
 
 			Collection<Music> musics = currentDirectory.getFiles();
-
 			for (Music music : musics) {
 				items.add(music.getTitle());
 			}
