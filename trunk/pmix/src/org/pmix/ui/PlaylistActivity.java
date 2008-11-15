@@ -32,7 +32,8 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	private int arrayListId;
 	private int songId;
 	private String title;
-
+	
+	public static final int MAIN = 0;
 	public static final int CLEAR = 1;
 	
 	@Override
@@ -80,8 +81,8 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
-		menu.add(0,CLEAR, 0, R.string.clear).setIcon(android.R.drawable.ic_menu_close_clear_cancel);
-		
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		menu.add(0,CLEAR, 1, R.string.clear).setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		return result;
 	}
 	
@@ -90,10 +91,15 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 
+		case MAIN:
+			Intent i = new Intent(this, MainMenuActivity.class);
+			startActivity(i);
+			return true;
 		case CLEAR:
 			try {
 				Contexte.getInstance().getMpd().getPlaylist().clear();
 				songlist.clear();
+				MainMenuActivity.notifyUser("Playlist cleared", this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 			} catch (MPDServerException e) {
 				// TODO Auto-generated catch block
@@ -124,6 +130,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		try {
 			Contexte.getInstance().getMpd().getPlaylist().removeSong(songId);
 			songlist.remove(arrayListId);
+			MainMenuActivity.notifyUser("Deleted song from playlist.", this);
 			((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block

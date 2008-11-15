@@ -2,23 +2,34 @@ package org.pmix.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.a0z.mpd.Directory;
+import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
-public class FSActivity extends ListActivity {
+public class FSActivity extends ListActivity implements OnMenuItemClickListener {
 	private List<String> items = new ArrayList<String>();
-
+	public final static int MAIN = 0;
+	public final static int PLAYLIST = 3;
 	private Directory currentDirectory = null;
+	private Directory currentContextDirectory = null;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -48,6 +59,7 @@ public class FSActivity extends ListActivity {
 
 			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 			setListAdapter(notes);
+			registerForContextMenu(getListView());
 		} catch (MPDServerException e) {
 			e.printStackTrace();
 			this.setTitle(e.getMessage());
@@ -55,6 +67,24 @@ public class FSActivity extends ListActivity {
 
 	}
 
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		String dirname = (String) this.getListView().getItemAtPosition(info.position);
+		if (info.position > currentDirectory.getDirectories().size() - 1 || currentDirectory.getDirectories().size() == 0) {
+			// Its a file, no Menu needed...
+			return;
+		}
+		currentContextDirectory = (Directory) currentDirectory.getDirectories().toArray()[info.position];
+		menu.setHeaderTitle(dirname);
+		MenuItem addArtist = menu.add(R.string.addDirectory);
+		addArtist.setOnMenuItemClickListener(this);
+	}
+	
+	
+	
+	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
@@ -101,5 +131,75 @@ public class FSActivity extends ListActivity {
 
 		}
 
+	}
+
+	private Collection getAllFiles(Directory dir)
+	{
+		try {
+			dir.refreshData();
+		} catch (MPDServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Collection files = dir.getFiles();
+		Collection dirs = dir.getDirectories();
+		Iterator itr = dirs.iterator();
+		
+		while(itr.hasNext())
+		{
+			Directory actdir = (Directory)itr.next();
+			files.addAll(getAllFiles(actdir));
+			files.addAll(actdir.getFiles());
+		}
+		return files;
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		try {
+			/*String dir = currentContextDirectory.getFullpath();
+			Directory mpddir = Contexte.getInstance().getMpd().listAllFiles(dir);
+			*/
+			Collection files = getAllFiles(currentContextDirectory);
+			Contexte.getInstance().getMpd().getPlaylist().add(files);
+			MainMenuActivity.notifyUser("Added directory to playlist.", this);
+			//((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
+		} catch (MPDServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	
+
+
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		menu.add(0,PLAYLIST, 1, R.string.playlist).setIcon(R.drawable.ic_menu_pmix_playlist);
+		
+		return result;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		Intent i = null;
+		
+		switch (item.getItemId()) {
+
+		case MAIN:
+			i = new Intent(this, MainMenuActivity.class);
+			startActivity(i);
+			return true;
+		case PLAYLIST:
+			i = new Intent(this, PlaylistActivity.class);
+			startActivityForResult(i, PLAYLIST);
+			return true;
+		}
+		return false;
 	}
 }

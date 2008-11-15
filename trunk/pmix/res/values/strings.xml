@@ -24,4 +24,6 @@
 <string name="addArtist">Add Artist</string>
 <string name="removeSong">Remove Song</string>
 <string name="clear">Clear</string>
+<string name="addDirectory">Add Directory</string>
+<string name="mainMenu">Main Menu</string>
 </resources>

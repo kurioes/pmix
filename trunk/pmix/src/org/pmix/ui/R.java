@@ -51,6 +51,7 @@ public final class R {
     public static final class string {
         public static final int addAlbum=0x7f040012;
         public static final int addArtist=0x7f040013;
+        public static final int addDirectory=0x7f040016;
         public static final int albums=0x7f040004;
         public static final int app_name=0x7f040000;
         public static final int artists=0x7f040001;
@@ -58,6 +59,7 @@ public final class R {
         public static final int clear=0x7f040015;
         public static final int files=0x7f040003;
         public static final int forward=0x7f04000e;
+        public static final int mainMenu=0x7f040017;
         public static final int next=0x7f04000c;
         public static final int ok=0x7f040008;
         public static final int playlist=0x7f040011;
