@@ -11,6 +11,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
@@ -22,6 +23,9 @@ public class AlbumsActivity extends ListActivity {
 
 	private List<String> items = new ArrayList<String>();
 
+	public final static int MAIN = 0;
+	public final static int PLAYLIST = 3;
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -61,6 +65,7 @@ public class AlbumsActivity extends ListActivity {
 				try {
 					ArrayList<Music> songs = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ALBUM, album));
 					Contexte.getInstance().getMpd().getPlaylist().add(songs);
+					MainMenuActivity.notifyUser("Album " + album + " added", AlbumsActivity.this);
 				} catch (MPDServerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -82,4 +87,31 @@ public class AlbumsActivity extends ListActivity {
 		startActivityForResult(intent, -1);
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		menu.add(0,PLAYLIST, 1, R.string.playlist).setIcon(R.drawable.ic_menu_pmix_playlist);
+		
+		return result;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		Intent i = null;
+		
+		switch (item.getItemId()) {
+
+		case MAIN:
+			i = new Intent(this, MainMenuActivity.class);
+			startActivity(i);
+			return true;
+		case PLAYLIST:
+			i = new Intent(this, PlaylistActivity.class);
+			startActivityForResult(i, PLAYLIST);
+			return true;
+		}
+		return false;
+	}
 }

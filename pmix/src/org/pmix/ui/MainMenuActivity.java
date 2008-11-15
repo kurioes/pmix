@@ -20,10 +20,12 @@ import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.preference.Preference;
@@ -39,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * MainMenuActivity is the starting activity of pmix
@@ -87,6 +90,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static final int TRACK_STEP = 10;
 
+	private static String lastNotification = null;
+	private static Toast notification = null;
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -110,6 +116,18 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		/*
+		WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+		int wifistate = wifi.getWifiState();
+		if(wifistate!=wifi.WIFI_STATE_ENABLED && wifistate!=wifi.WIFI_STATE_ENABLING)
+		{
+			setTitle("No WIFI");
+			return;
+		}
+		while(wifistate!=wifi.WIFI_STATE_ENABLED)
+			setTitle("Waiting for WIFI");
+			*/
 		myLogger.log(Level.INFO, "onResume");
 		try {
 			String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
@@ -124,6 +142,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			monitor.addStatusChangeListener(this);
 			monitor.addTrackPositionListener(this);
 			monitor.start();
+			setTitle("pmix");
 			myLogger.log(Level.INFO, "Monitor started");
 		} catch (MPDServerException e) {
 			setTitle("Error");
@@ -579,4 +598,24 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	public ProgressBar getCoverSwitcherProgress() {
 		return coverSwitcherProgress;
 	}
+	
+	
+
+    public static void notifyUser(String message, Context context) {
+            if (notification != null) {
+                    // Don't keep telling the user the same thing.
+                    if (lastNotification != null && lastNotification.equals(message))
+                            return;
+                    
+                    notification.setText(message);
+                    notification.show();
+            } else {
+                    notification = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+                    notification.show();
+            }
+            
+            lastNotification = message;
+    }
+	
+	
 }
