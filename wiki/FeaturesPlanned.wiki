@@ -19,3 +19,4 @@ PMix is still in early development phase... There are several features we would 
   * Connect only when WLAN is on (PMix is useless over internet, right?)
   * Type Safety (mainly in JMPDComm)
   * Download Songs to Android (via Context Menu)
+  * Save and Load Playlists
