@@ -20,3 +20,4 @@ PMix is still in early development phase... There are several features we would 
   * Type Safety (mainly in JMPDComm)
   * Download Songs to Android (via Context Menu)
   * Save and Load Playlists
+  * Slider for letters as in Contacts
