@@ -157,12 +157,9 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		try {
-			/*String dir = currentContextDirectory.getFullpath();
-			Directory mpddir = Contexte.getInstance().getMpd().listAllFiles(dir);
-			*/
 			Collection files = getAllFiles(currentContextDirectory);
 			Contexte.getInstance().getMpd().getPlaylist().add(files);
-			MainMenuActivity.notifyUser("Added directory to playlist.", this);
+			MainMenuActivity.notifyUser(getResources().getString(R.string.addedDirectoryToPlaylist), this);
 			//((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block

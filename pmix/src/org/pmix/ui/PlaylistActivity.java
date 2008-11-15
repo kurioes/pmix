@@ -74,10 +74,34 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		title = (String)songlist.get(info.position).get("title");
 
 		menu.setHeaderTitle(title);
-		MenuItem addArtist = menu.add(R.string.removeSong);
+		MenuItem addArtist = menu.add(menu.NONE, 0, 0, R.string.removeSong);
 		addArtist.setOnMenuItemClickListener(this);
 	}
 
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch (item.getItemId()) {
+		case 0:
+			try {
+				Contexte.getInstance().getMpd().getPlaylist().removeSong(songId);
+				songlist.remove(arrayListId); 
+				Contexte.getInstance().getMpd().getPlaylist().refresh(); // If not refreshed an intern Array of JMPDComm get out of sync and throws IndexOutOfBound
+				MainMenuActivity.notifyUser(getResources().getString(R.string.deletedSongFromPlaylist), this);
+				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
+			} catch (MPDServerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * Create Menu for Playlist View
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
@@ -89,8 +113,8 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		// Menu actions...
 		switch (item.getItemId()) {
-
 		case MAIN:
 			Intent i = new Intent(this, MainMenuActivity.class);
 			startActivity(i);
@@ -99,7 +123,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 			try {
 				Contexte.getInstance().getMpd().getPlaylist().clear();
 				songlist.clear();
-				MainMenuActivity.notifyUser("Playlist cleared", this);
+				MainMenuActivity.notifyUser(getResources().getString(R.string.playlistCleared), this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 			} catch (MPDServerException e) {
 				// TODO Auto-generated catch block
@@ -116,27 +140,13 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-    Music m = musics.get(position);
-
-    try {
-      Contexte.getInstance().getMpd().skipTo(m.getSongId());
-    } catch (MPDServerException e) {
-    }
-		
-	}
-
-	@Override
-	public boolean onMenuItemClick(MenuItem item) {
-		try {
-			Contexte.getInstance().getMpd().getPlaylist().removeSong(songId);
-			songlist.remove(arrayListId);
-			MainMenuActivity.notifyUser("Deleted song from playlist.", this);
-			((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
-		} catch (MPDServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return true;
+		// Play selected Song
+		Music m = musics.get(position);
+	    try {
+	    	Contexte.getInstance().getMpd().skipTo(m.getSongId());
+	    } catch (MPDServerException e) {
+	    }
+			
 	}
 
 }

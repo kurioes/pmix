@@ -11,11 +11,11 @@
 	<string name="ok">OK</string>
 	<string name="serverAddress">Server Address :</string>
 
-	<string name="prev">|&lt;&lt;</string>
-	<string name="playpause">|&gt;</string>
-	<string name="next">&gt;&gt;|</string>
-	<string name="back">&lt;&lt;</string>
-	<string name="forward">&gt;&gt;</string>
+	
+	
+	
+	
+	
 	<string name="progressbar_1_plus">+</string>
 	<string name="progressbar_1_minus">-</string>
 <string name="playlist">Playlist</string>
@@ -26,4 +26,15 @@
 <string name="clear">Clear</string>
 <string name="addDirectory">Add Directory</string>
 <string name="mainMenu">Main Menu</string>
+<string name="playlistCleared">Playlist cleared</string>
+<string name="deletedSongFromPlaylist">Deleted song from playlist</string>
+<string name="albumAdded">Album %s added</string>
+<string name="addedDirectoryToPlaylist">Added directory to playlist</string>
+<string name="artistAdded">Artist added</string>
+<string name="host">Host</string>
+<string name="hostDescription">MPD-Server Hostname or IP-Adress</string>
+<string name="port">Port</string>
+<string name="portDescription">MPD-Server port (Default: 6600)</string>
+<string name="password">Password</string>
+<string name="passwordDescription">Password for the Server</string>
 </resources>

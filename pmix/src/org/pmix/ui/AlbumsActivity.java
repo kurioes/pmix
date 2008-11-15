@@ -65,7 +65,7 @@ public class AlbumsActivity extends ListActivity {
 				try {
 					ArrayList<Music> songs = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ALBUM, album));
 					Contexte.getInstance().getMpd().getPlaylist().add(songs);
-					MainMenuActivity.notifyUser("Album " + album + " added", AlbumsActivity.this);
+					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.albumAdded),album), AlbumsActivity.this);
 				} catch (MPDServerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

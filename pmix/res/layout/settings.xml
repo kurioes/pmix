@@ -3,21 +3,21 @@
  <PreferenceCategory android:title="Connection settings">  
          <EditTextPreference  
              android:key="hostname"  
-             android:title="Host"  
-             android:summary="MPD-Server Hostname or IP-Adress"
+             android:title="@string/host"  
+             android:summary="@string/hostDescription"
              />  
          <EditTextPreference  
              android:key="port"
-             android:title="Port"
+             android:title="@string/port"
              android:defaultValue="6600"
-             android:summary="MPD-Server port (Default: 6600)"
+             android:summary="@string/portDescription"
              />  
          <EditTextPreference  
              android:key="password"  
-             android:title="Password"
+             android:title="@string/password"
              android:defaultValue=""
              android:password="true"
-             android:summary="Password for the Server" /> 
+             android:summary="@string/passwordDescription" /> 
              />  
      </PreferenceCategory>  
 </PreferenceScreen>
