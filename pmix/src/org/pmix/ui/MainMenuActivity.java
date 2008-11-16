@@ -42,6 +42,8 @@ import android.widget.ImageSwitcher;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.SeekBar;
+
 
 /**
  * MainMenuActivity is the starting activity of pmix
@@ -74,9 +76,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private TextView mainInfo = null;
 
-	private HorizontalSlider progressBar = null;
-
-	private HorizontalSlider progressBarTrack = null;
+	private SeekBar progressBarVolume = null;
+	private SeekBar progressBarTrack = null;
 
 	private TextView trackTime = null;
 
@@ -90,7 +91,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static final int TRACK_STEP = 10;
 
-	private static String lastNotification = null;
 	private static Toast notification = null;
 	
 	@Override
@@ -128,27 +128,32 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		while(wifistate!=wifi.WIFI_STATE_ENABLED)
 			setTitle("Waiting for WIFI");
 			*/
-		myLogger.log(Level.INFO, "onResume");
-		try {
-			String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
-			StringBuffer stringBuffer = new StringBuffer(100);
-			String serverAdress = Contexte.getInstance().getServerAddress();
-			stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
-			mainInfo.setText(stringBuffer.toString());
-
-			Contexte.getInstance().getMpd().getPlaylist().refresh();
-			
-			monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
-			monitor.addStatusChangeListener(this);
-			monitor.addTrackPositionListener(this);
-			monitor.start();
-			setTitle("pmix");
-			myLogger.log(Level.INFO, "Monitor started");
-		} catch (MPDServerException e) {
-			setTitle("Error");
-			myLogger.log(Level.WARNING, "Initialization failed...");
-			mainInfo.setText(e.getMessage());
-		}
+		boolean tryagain = false;
+		{
+			myLogger.log(Level.INFO, "onResume");
+			try {
+				String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
+				StringBuffer stringBuffer = new StringBuffer(100);
+				String serverAdress = Contexte.getInstance().getServerAddress();
+				stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
+				mainInfo.setText(stringBuffer.toString());
+	
+				Contexte.getInstance().getMpd().getPlaylist().refresh();
+				
+				monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
+				monitor.addStatusChangeListener(this);
+				monitor.addTrackPositionListener(this);
+				monitor.start();
+				setTitle("pmix");
+				myLogger.log(Level.INFO, "Monitor started");
+			} catch (MPDServerException e) {
+				setTitle("Error");
+				myLogger.log(Level.WARNING, "Initialization failed...");
+				if(e.getMessage().startsWith("Operation time") && !tryagain)
+					tryagain = true;
+				mainInfo.setText(e.getMessage());
+			}
+		} while(tryagain);
 
 		
 	}
@@ -157,12 +162,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		setContentView(R.layout.main);
 		
 		mainInfo = (TextView) findViewById(R.id.mainInfo);
-		progressBar = (HorizontalSlider) findViewById(R.id.progress_volume);
 		artistNameText = (TextView) findViewById(R.id.artistName);
 		albumNameText = (TextView) findViewById(R.id.albumName);
 		songNameText = (TextView) findViewById(R.id.songName);
 
-		progressBarTrack = (HorizontalSlider) findViewById(R.id.progress_track);
+		progressBarTrack = (SeekBar) findViewById(R.id.progress_track);
+		progressBarVolume = (SeekBar) findViewById(R.id.progress_volume);
 
 		trackTime = (TextView) findViewById(R.id.trackTime);
 
@@ -177,15 +182,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		}
 		Contexte.getInstance().setServerPassword(settings.getString("password", ""));
 		
-		
-		/*
-		 * @author slubman
-		 * I've set those values in the main.xml, shouldn't we remove those calls?
-		 */
-/*		((TextView) findViewById(R.id.volume)).setTextSize(12);
-		((TextView) findViewById(R.id.track)).setTextSize(12);
-		((TextView) findViewById(R.id.trackTime)).setTextSize(12);
-*/
 		coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
 		/* sag, would like to implement a loading Progress
 		coverSwitcherProgress = (ProgressBar) findViewById(R.id.albumCoverProgress); 
@@ -285,37 +281,56 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			}
 		});
 
-		progressBar.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
-
-			/*
-			 * @author slubman
-			 *  This Override appear as an error in eclipse
+		progressBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 			@Override
-			*/
-			public void onProgressChanged(View v, int progress) {
-				try {
-					Contexte.getInstance().getMpd().setVolume(progress);
-				} catch (MPDServerException e) {
-					e.printStackTrace();
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromTouch) {
+				if(fromTouch)
+				{
+					try {
+						Contexte.getInstance().getMpd().setVolume(progress);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
 				}
-
+				
+			}
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
-		progressBarTrack.setOnProgressChangeListener(new HorizontalSlider.OnProgressChangeListener() {
-
-			/*
-			 * @author slubman
-			 *  This Override appear as an error in eclipse
+		progressBarTrack.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 			@Override
-			*/
-			public void onProgressChanged(View v, int progress) {
-				try {
-					int position = (progress * handler.getCurrentSongTime()) / 100;
-					Contexte.getInstance().getMpd().seek(position);
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromTouch) {
+				if(fromTouch)
+				{
 
+					try {
+						int position = (progress * handler.getCurrentSongTime()) / 100;
+						Contexte.getInstance().getMpd().seek(position);
+					} catch (MPDServerException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 		
@@ -330,11 +345,11 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		try {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
-				progressBar.incrementProgressBy(VOLUME_STEP);
+				progressBarVolume.incrementProgressBy(VOLUME_STEP);
 				Contexte.getInstance().getMpd().adjustVolume(VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
-				progressBar.incrementProgressBy(-VOLUME_STEP);
+				progressBarVolume.incrementProgressBy(-VOLUME_STEP);
 				Contexte.getInstance().getMpd().adjustVolume(-VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -533,17 +548,14 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 	
 	
-	public ProgressBar getProgressBar() {
-		return progressBar;
+	public SeekBar getVolumeSeekBar() {
+		return progressBarVolume;
 	}
 
-	public ProgressBar getProgressBarTrack() {
+	public SeekBar getProgressBarTrack() {
 		return progressBarTrack;
 	}
 
-	public void setProgressBarTrack(HorizontalSlider progressBarTrack) {
-		this.progressBarTrack = progressBarTrack;
-	}
 
 	public void trackPositionChanged(MPDTrackPositionChangedEvent event) {
 		MPDStatus status = event.getMpdStatus();
@@ -603,18 +615,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
     public static void notifyUser(String message, Context context) {
             if (notification != null) {
-                    // Don't keep telling the user the same thing.
-                    if (lastNotification != null && lastNotification.equals(message))
-                            return;
-                    
                     notification.setText(message);
                     notification.show();
             } else {
                     notification = Toast.makeText(context, message, Toast.LENGTH_SHORT);
                     notification.show();
             }
-            
-            lastNotification = message;
     }
 	
 	

@@ -62,13 +62,11 @@
 			<TextView android:id="@+id/track" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:text="@string/track" android:gravity="center" android:textSize="12sp"/>
 
-			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_track"
-				
-				android:layout_width="250dip"
-				android:layout_height="wrap_content" android:max="100"
-				android:progress="0" />
-
-
+			<SeekBar android:layout_height="wrap_content" 
+					 android:id="@+id/progress_track"  
+					 android:layout_width="250dip"
+					 android:max="100" 
+					 android:progress="0"/>
 		</LinearLayout>
 		
 		<LinearLayout android:orientation="vertical"
@@ -80,11 +78,11 @@
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:text="@string/volume" android:gravity="center" android:textSize="12sp"/>
 
-			<org.pmix.ui.HorizontalSlider  android:id="@+id/progress_volume"
-				android:layout_width="250dip"
-				android:indeterminate="false"
-				android:layout_height="wrap_content" android:max="100"
-				android:progress="0" />
+			<SeekBar android:layout_height="wrap_content" 
+					 android:id="@+id/progress_volume"  
+					 android:layout_width="250dip"
+					 android:max="100" 
+					 android:progress="0"/>
 
 			
 		</LinearLayout>

@@ -109,7 +109,7 @@ public class MyHandler extends Handler implements ViewSwitcher.ViewFactory {
 			mainMenuActivity.getProgressBarTrack().setEnabled(false);
 			mainMenuActivity.getProgressBarTrack().setProgress(0);
 		}
-		mainMenuActivity.getProgressBar().setProgress(status.getVolume());
+		mainMenuActivity.getVolumeSeekBar().setProgress(status.getVolume());
 
 		currentSongTime = (int) status.getTotalTime();
 	}
