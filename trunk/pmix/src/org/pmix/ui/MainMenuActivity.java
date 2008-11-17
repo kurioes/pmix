@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import java.io.Serializable;
 
 import org.a0z.mpd.MPD;
+import org.a0z.mpd.MPDConnectionException;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.MPDStatusMonitor;
@@ -121,7 +122,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		String serverAdress = Contexte.getInstance().getServerAddress();
+		if(serverAdress.equals(""))
+			return;
 		/*
 		WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 		int wifistate = wifi.getWifiState();
@@ -137,23 +140,26 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		{
 			myLogger.log(Level.INFO, "onResume");
 			try {
+				Contexte.getInstance().disconnect(); // This is needed in case whe were in standby in another Activity...
 				String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
 				StringBuffer stringBuffer = new StringBuffer(100);
-				String serverAdress = Contexte.getInstance().getServerAddress();
 				stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
 				mainInfo.setText(stringBuffer.toString());
+				MPDStatus state = Contexte.getInstance().getMpd().getStatus();
 				Contexte.getInstance().getMpd().getPlaylist().refresh();
 				monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
 				monitor.addStatusChangeListener(this);
 				monitor.addTrackPositionListener(this);
 				monitor.start();
-				setTitle("pmix");
+				setTitle("PMix");
 				myLogger.log(Level.INFO, "Monitor started");
+			} catch (MPDConnectionException e) {
+				tryagain = true;
 			} catch (MPDServerException e) {
 				setTitle("Error");
 				myLogger.log(Level.WARNING, "Initialization failed... ");
-				//if(e.getMessage().startsWith("Operation time" + e.getClass()) && !tryagain)
-					//tryagain = true;
+				if(e.getMessage().startsWith("Operation time" + e.getClass()) && !tryagain)
+					tryagain = true;
 				mainInfo.setText(e.getMessage()+" "+e.getClass());
 			}
 		} while(tryagain);
@@ -495,17 +501,33 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void trackChanged(MPDTrackChangedEvent event) {
-
 		MPDStatus status = event.getMpdStatus();
 		if(status!=null)
 		{
-			if (status.getState().equals(MPDStatus.MPD_STATE_PLAYING)) {
-				Message message = Message.obtain();
-				message.obj = status;
-				handler.sendMessage(message);
+			String state = status.getState();
+			if(state != null)
+			{
+				if (state.equals(MPDStatus.MPD_STATE_PLAYING)) {
+					Message message = Message.obtain();
+					message.obj = status;
+					handler.sendMessage(message);
+				}
+			}
+			else
+			{
+				if(monitor != null)
+					monitor.giveup();
+				monitor = null;
+				Contexte.getInstance().disconnect();
+				// Connection is likly dropped (MPD restarted)
+				runOnUiThread(new Runnable(){
+					@Override
+					public void run() {
+						onResume();
+					}
+				});
 			}
 		}
-
 	}
 
 	public TextView getMainInfo() {

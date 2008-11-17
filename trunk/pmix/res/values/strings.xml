@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">pmix</string>
+	<string name="app_name">PMix</string>
 	<string name="artists">Artists</string>
 	<string name="playlists">Playlists</string>
 	<string name="files">Files</string>
