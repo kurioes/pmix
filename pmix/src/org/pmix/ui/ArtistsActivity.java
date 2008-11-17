@@ -42,7 +42,7 @@ public class ArtistsActivity extends ListActivity {
 			// Thread gets Album data...
 			@Override
 			public void start() {
-				pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Albums...");
+				pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Artists...");
 				super.start();
 			}
 			@Override
