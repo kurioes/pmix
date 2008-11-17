@@ -21,3 +21,4 @@ PMix is still in early development phase... There are several features we would 
   * Download Songs to Android (via Context Menu)
   * Save and Load Playlists
   * Slider for letters as in Contacts
+  * Consider use tabs instead menus
