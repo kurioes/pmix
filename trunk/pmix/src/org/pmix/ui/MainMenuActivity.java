@@ -1,7 +1,9 @@
 package org.pmix.ui;
 
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.Serializable;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
@@ -20,6 +22,7 @@ import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -93,6 +96,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static Toast notification = null;
 	
+	private Collection artists = null;
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -137,9 +142,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				String serverAdress = Contexte.getInstance().getServerAddress();
 				stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
 				mainInfo.setText(stringBuffer.toString());
-	
 				Contexte.getInstance().getMpd().getPlaylist().refresh();
-				
 				monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
 				monitor.addStatusChangeListener(this);
 				monitor.addTrackPositionListener(this);
@@ -148,10 +151,10 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				myLogger.log(Level.INFO, "Monitor started");
 			} catch (MPDServerException e) {
 				setTitle("Error");
-				myLogger.log(Level.WARNING, "Initialization failed...");
-				if(e.getMessage().startsWith("Operation time") && !tryagain)
-					tryagain = true;
-				mainInfo.setText(e.getMessage());
+				myLogger.log(Level.WARNING, "Initialization failed... ");
+				//if(e.getMessage().startsWith("Operation time" + e.getClass()) && !tryagain)
+					//tryagain = true;
+				mainInfo.setText(e.getMessage()+" "+e.getClass());
 			}
 		} while(tryagain);
 

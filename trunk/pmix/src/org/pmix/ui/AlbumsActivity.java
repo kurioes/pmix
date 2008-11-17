@@ -8,6 +8,7 @@ import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -21,7 +22,7 @@ import android.widget.ListView;
 
 public class AlbumsActivity extends ListActivity {
 
-	private List<String> items = new ArrayList<String>();
+	private List<String> items;
 
 	public final static int MAIN = 0;
 	public final static int PLAYLIST = 3;
@@ -32,24 +33,41 @@ public class AlbumsActivity extends ListActivity {
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
 
-		try {
-			items.clear();
-
-			if (this.getIntent().getStringExtra("artist") != null) {
-				items.addAll(Contexte.getInstance().getMpd().listAlbums((String) this.getIntent().getStringExtra("artist")));
-				this.setTitle((String) this.getIntent().getStringExtra("artist"));
-			} else {
-				items.addAll(Contexte.getInstance().getMpd().listAlbums());
+		setTitle((String) getIntent().getStringExtra("artist"));
+		Thread th = new Thread(){
+			ProgressDialog pd;
+			// Thread gets Album data...
+			@Override
+			public void start() {
+				pd = ProgressDialog.show(AlbumsActivity.this, "Loading...", "Load Albums...");
+				super.start();
 			}
-
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(notes);
-		} catch (MPDServerException e) {
-			e.printStackTrace();
-			this.setTitle(e.getMessage());
-		}
-		ListView list = this.getListView();
-		registerForContextMenu(list);
+			@Override
+			public void run() {
+				try {
+					if (getIntent().getStringExtra("artist") != null) {
+						items = (List)Contexte.getInstance().getMpd().listAlbums((String) getIntent().getStringExtra("artist"));
+					} else {
+						items = (List)Contexte.getInstance().getMpd().listAlbums();
+					}
+					pd.dismiss();
+					runOnUiThread(new Runnable(){
+						// Sets Album data to the UI...
+						@Override
+						public void run() {
+							ArrayAdapter<String> notes = new ArrayAdapter<String>(AlbumsActivity.this, android.R.layout.simple_list_item_1, items);
+							setListAdapter(notes);
+							ListView list = getListView();
+							registerForContextMenu(list);
+						}
+					});
+				} catch (MPDServerException e) {
+					e.printStackTrace();
+					setTitle(e.getMessage());
+				}
+			}
+		};
+		th.start();
 	}
 
 	@Override
