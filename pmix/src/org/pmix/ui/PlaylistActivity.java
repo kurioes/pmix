@@ -79,7 +79,6 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	}
 
 
-	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 		case 0:

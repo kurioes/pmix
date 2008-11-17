@@ -154,7 +154,6 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 		return files;
 	}
 
-	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		try {
 			Collection files = getAllFiles(currentContextDirectory);
