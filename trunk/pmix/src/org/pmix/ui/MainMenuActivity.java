@@ -262,11 +262,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		 */
 		button.setOnLongClickListener(new Button.OnLongClickListener() {
 
-			/*
-			 * @author slubman
-			 *  This Override appear as an error in eclipse
-			@Override
-			*/
 			public boolean onLongClick(View v) {
 				try {
 					Contexte.getInstance().getMpd().stop();
@@ -291,7 +286,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		});
 
 		progressBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromTouch) {
 				if(fromTouch)
@@ -304,19 +298,19 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				}
 				
 			}
-			@Override
+
 			public void onStartTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
 				
 			}
-			@Override
+
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
 				
 			}
 		});
 		progressBarTrack.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-			@Override
+
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromTouch) {
 				if(fromTouch)
@@ -331,12 +325,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				}
 				
 			}
-			@Override
+
 			public void onStartTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
 				
 			}
-			@Override
+
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
 				
@@ -470,11 +464,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
 			{
 				this.runOnUiThread(new Runnable(){
-					/*
-					 * @author slubman
-					 *  This Override appear as an error in eclipse
-					@Override
-					*/
 					public void run() {
 						ImageButton button = (ImageButton) findViewById(R.id.playpause);
 						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
@@ -485,11 +474,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			else
 			{
 				this.runOnUiThread(new Runnable(){
-					/*
-					 * @author slubman
-					 *  This Override appear as an error in eclipse
-					@Override
-					*/
 					public void run() {
 						ImageButton button = (ImageButton) findViewById(R.id.playpause);
 						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
@@ -521,7 +505,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				Contexte.getInstance().disconnect();
 				// Connection is likly dropped (MPD restarted)
 				runOnUiThread(new Runnable(){
-					@Override
 					public void run() {
 						onResume();
 					}
@@ -613,11 +596,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 
-	/*
-	 * @author slubman
-	 *  This Override appear as an error in eclipse
-	@Override
-	*/
 	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
 		if(settings.contains("hostname") || settings.contains("port") || settings.contains("password"))
 		{

@@ -52,7 +52,6 @@ public class ArtistsActivity extends ListActivity {
 						items = (List)Contexte.getInstance().getMpd().listArtists();
 					runOnUiThread(new Runnable(){
 						// Sets Album data to the UI...
-						@Override
 						public void run() {
 							ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
 							setListAdapter(artistsAdapter);

@@ -53,7 +53,6 @@ public class AlbumsActivity extends ListActivity {
 					pd.dismiss();
 					runOnUiThread(new Runnable(){
 						// Sets Album data to the UI...
-						@Override
 						public void run() {
 							ArrayAdapter<String> notes = new ArrayAdapter<String>(AlbumsActivity.this, android.R.layout.simple_list_item_1, items);
 							setListAdapter(notes);
