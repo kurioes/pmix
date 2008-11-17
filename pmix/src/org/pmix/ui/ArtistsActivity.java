@@ -1,6 +1,7 @@
 package org.pmix.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.a0z.mpd.MPD;
@@ -8,6 +9,7 @@ import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,8 +25,8 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ArtistsActivity extends ListActivity {
-
-	private List<String> items = new ArrayList<String>();
+	// TODO: Is static really the solution? No, should be cashed in JMPDComm ,but it loads it only once with this "hotfix"...
+	private static List<String> items = null;
 
 	public final static int MAIN = 0;
 	public final static int PLAYLIST = 3;
@@ -35,24 +37,37 @@ public class ArtistsActivity extends ListActivity {
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
 
-		items.clear();
-		try {
-
-			items.addAll(Contexte.getInstance().getMpd().listArtists());
-			//ListView myList = (ListView)findViewById(R.id.android:list);
-			//myList.setOnItemLongClickListener(this);
-			/*
-			ListView list = this.getListView();
-			list.setOnItemLongClickListener(this);
-			*/
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(notes);
-		} catch (MPDServerException e) {
-			e.printStackTrace();
-			this.setTitle(e.getMessage());
-		}
-		ListView list = this.getListView();
-		registerForContextMenu(list);
+		Thread th = new Thread(){
+			ProgressDialog pd;
+			// Thread gets Album data...
+			@Override
+			public void start() {
+				pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Albums...");
+				super.start();
+			}
+			@Override
+			public void run() {
+				try {
+					if(items == null)
+						items = (List)Contexte.getInstance().getMpd().listArtists();
+					runOnUiThread(new Runnable(){
+						// Sets Album data to the UI...
+						@Override
+						public void run() {
+							ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
+							setListAdapter(artistsAdapter);
+							ListView list = getListView();
+							registerForContextMenu(list);
+						}
+					});
+					pd.dismiss();
+				} catch (MPDServerException e) {
+					e.printStackTrace();
+					setTitle(e.getMessage());
+				}
+			}
+		};
+		th.start();
 	}
 
 	@Override
