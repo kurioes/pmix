@@ -1,0 +1,26 @@
+#summary Describes how to make a release of PMix
+= Release process for pmix =
+
+== First time ==
+We have to use a self-signed certificate to sigining the apk files... I generated this key, if you need this ask me (stefan.agner)
+keytool -genkey -v -keystore pmix.keystore -alias pmix -keyalg RSA -validity 10000
+I used this values for the certificate:
+CN=PMix developer, OU=Unknown, O=pmix, L=Unknown, ST=Unknown, C=org
+
+To change the keypassword, use this command:
+keytool -keypasswd -v -keystore pmix.keystore -alias pmix
+
+To export the Key (e.g. to transfer to another developer) use this command:
+keytool -exportcert -v -keystore pmix.keystore -alias pmix ...
+
+== Every release ==
+# Test the application! :-)
+# Check android:versionName and android:versionCode in AndroidManifest.xml
+# Remove android:debuggable="true" from the Element <application> AndroidManifest.xml (if exists)
+# Remove log files, backup files, and other unnecessary files from the application project (not needed normally)
+# Deactivate any calls to Log methods in the source code (I don't did this at my releases)
+# Right Click on the pmix project, choose "Android Tools" and "Export Unsigned Application Package..."
+# Save the File as PMix.apk
+# Sign the apk file with jarsigner -verbose -keystore pmix.keystore PMix.apk pmix
+# Verify the signed apk file with jarsigner -verify -verbose -certs PMix.apk
+
