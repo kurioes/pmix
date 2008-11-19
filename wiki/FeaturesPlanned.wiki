@@ -13,8 +13,8 @@ PMix is still in early development phase... There are several features we would 
   * Add Licence notice to source files
 
 = Planned features for further releases =
-  * Nicer browsing for Artists/Albums (equal to Android Music Player)
-  * Choose Output 
+  * Nicer browsing for Artists/Albums (maybe equal to Android Music Player)
+  * Choose MPD-Outputs
   * Add more than one MPD-Server
   * Connect only when WLAN is on (PMix is useless over internet, right?)
   * Type Safety (mainly in JMPDComm)
@@ -22,3 +22,8 @@ PMix is still in early development phase... There are several features we would 
   * Save and Load Playlists
   * Slider for letters as in Contacts
   * Consider use tabs instead menus
+  * WakeOnLan Settings
+  * Centralize connection management
+  * Option for Random/Repeat mode
+  * Menuitem to refresh directory (on MPD) in FSActivity
+  
