@@ -32,3 +32,4 @@ keytool -exportcert -v -keystore pmix.keystore -alias pmix ...
  # Save the File as PMix.apk
  # Sign the apk file with jarsigner -verbose -keystore pmix.keystore PMix.apk pmix
  # Verify the signed apk file with jarsigner -verify -verbose -certs PMix.apk
+ # svn copy https://pmix.googlecode.com/svn/trunk https://pmix.googlecode.com/svn/branches/0.3 --username stefan.agner
