@@ -27,6 +27,7 @@ keytool -exportcert -v -keystore pmix.keystore -alias pmix ...
  # Remove android:debuggable="true" from the Element <application> AndroidManifest.xml (if exists)
  # Remove log files, backup files, and other unnecessary files from the application project (not needed normally)
  # Deactivate any calls to Log methods in the source code (I don't did this at my releases)
+ # Call "Project" "Clean", just to make sure all is recompiled right...
  # Right Click on the pmix project, choose "Android Tools" and "Export Unsigned Application Package..."
  # Save the File as PMix.apk
  # Sign the apk file with jarsigner -verbose -keystore pmix.keystore PMix.apk pmix
