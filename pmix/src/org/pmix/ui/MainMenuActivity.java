@@ -136,7 +136,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		while(wifistate!=wifi.WIFI_STATE_ENABLED)
 			setTitle("Waiting for WIFI");
 			*/
-		boolean tryagain = false;
+		boolean tryagain = true;
+		while(tryagain) 
 		{
 			myLogger.log(Level.INFO, "onResume");
 			try {
@@ -153,16 +154,18 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				monitor.start();
 				setTitle("PMix");
 				myLogger.log(Level.INFO, "Monitor started");
+				tryagain = false;
 			} catch (MPDConnectionException e) {
 				tryagain = true;
 			} catch (MPDServerException e) {
 				setTitle("Error");
+				tryagain = false;
 				myLogger.log(Level.WARNING, "Initialization failed... ");
-				if(e.getMessage().startsWith("Operation time" + e.getClass()) && !tryagain)
+				if(e.getMessage().startsWith("The operation timed") && !tryagain)
 					tryagain = true;
 				mainInfo.setText(e.getMessage()+" "+e.getClass());
 			}
-		} while(tryagain);
+		}
 
 		
 	}

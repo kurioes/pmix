@@ -55,18 +55,17 @@ public class ArtistsActivity extends ListActivity {
 						public void run() {
 							ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
 							setListAdapter(artistsAdapter);
-							ListView list = getListView();
-							registerForContextMenu(list);
 						}
 					});
 					pd.dismiss();
 				} catch (MPDServerException e) {
 					e.printStackTrace();
-					setTitle(e.getMessage());
 				}
 			}
 		};
 		th.start();
+		ListView list = getListView();
+		registerForContextMenu(list);
 	}
 
 	@Override
