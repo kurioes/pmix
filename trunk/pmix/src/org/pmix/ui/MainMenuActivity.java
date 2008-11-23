@@ -23,12 +23,16 @@ import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
 import org.pmix.ui.CoverAsyncHelper.CoverDownloadListener;
+import org.pmix.ui.MPDAsyncHelper.ConnectionListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -60,7 +64,7 @@ import android.widget.ViewSwitcher.ViewFactory;
  * @author Rémi Flament, Stefan Agner
  * @version $Id:  $
  */
-public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener, OnSharedPreferenceChangeListener, CoverDownloadListener {
+public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener, OnSharedPreferenceChangeListener, CoverDownloadListener, ConnectionListener {
 
 	private Logger myLogger = Logger.global;
 	
@@ -104,6 +108,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static Toast notification = null;
 	
+	private AlertDialog ad;
+	
 	private ButtonEventHandler buttonEventHandler;
 	
 	// Change this... (sag)
@@ -128,75 +134,41 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		super.onRestart();
 		myLogger.log(Level.INFO, "onRestart");
 	}
-
+	
 	@Override
 	protected void onStart() {
 		super.onStart();
 		oMPDAsyncHelper = new MPDAsyncHelper();
 		oMPDAsyncHelper.addStatusChangeListener(this);
 		oMPDAsyncHelper.addTrackPositionListener(this);
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		
-		// Get Settings and Connect...
+		oMPDAsyncHelper.addConnectionListener(this);
+
+		// Get Settings...
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
 		settings.registerOnSharedPreferenceChangeListener(this);
 		String sServer = settings.getString("hostname", "");
 		int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
 		String sPassword = settings.getString("password", "");
-		oMPDAsyncHelper.doConnect(sServer, iPort, sPassword);
-		
-		/*
-		Contexte.getInstance().start();
-		
-		Runnable runConnect = new Runnable() {
+		oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
 
-			@Override
-			public void run() {
-
-				String serverAdress = Contexte.getInstance().getServerAddress();
-				if(serverAdress.equals(""))
-					return;
-				boolean tryagain = true;
-				while(tryagain) 
-				{
-					myLogger.log(Level.INFO, "onResume");
-					try {
-						Contexte.getInstance().disconnect(); // This is needed in case whe were in standby in another Activity...
-						String mpdVersion = MainMenuActivity.oMPDAsyncHelper.oMPD.getMpdVersion();
-						
-						mainInfo.setText(stringBuffer.toString());
-						MPDStatus state = MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus();
-						MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().refresh();
-						monitor = new MPDStatusMonitor(MainMenuActivity.oMPDAsyncHelper.oMPD, 1000);
-						monitor.addStatusChangeListener(MainMenuActivity.this);
-						monitor.addTrackPositionListener(MainMenuActivity.this);
-						monitor.start();
-						setTitle("PMix");
-						myLogger.log(Level.INFO, "Monitor started");
-						tryagain = false;
-					} catch (MPDConnectionException e) {
-						tryagain = true;
-					} catch (MPDServerException e) {
-						setTitle("Error");
-						tryagain = false;
-						myLogger.log(Level.WARNING, "Initialization failed... ");
-						if(e.getMessage().startsWith("The operation timed") && !tryagain)
-							tryagain = true;
-						mainInfo.setText(e.getMessage()+" "+e.getClass());
-					}
-				}
-			}
-			
-		};
-		
-		
-		Message myMsg = Message.obtain(Contexte.getInstance(), runConnect);
-		*/
-		
+		connectMPD();
+	}
+	
+	private void connectMPD()
+	{
+		ad = new ProgressDialog(this);
+		ad.setTitle("Connecting...");
+		ad.setMessage("Connecting to MPD-Server.");
+		ad.show();
+		oMPDAsyncHelper.doConnect();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		oMPDAsyncHelper.startMonitor();
+		oMPDAsyncHelper.stopMonitor();
+		oMPDAsyncHelper.startMonitor();
 		/*
 		WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 		int wifistate = wifi.getWifiState();
@@ -243,12 +215,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				return i;
 			}
 		});
-		/* sag, would like to implement a loading Progress
+		/* sag, would like to implement a loading Progress */
 		coverSwitcherProgress = (ProgressBar) findViewById(R.id.albumCoverProgress); 
 		coverSwitcherProgress.setIndeterminate(true);
 		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		
-		
+		/*
 		handler = new MyHandler(this);
 		coverSwitcher.setFactory(handler);
 		*/
@@ -426,7 +398,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
 		if (settings.getString("hostname", "").equals("")) {
-			this.startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS);
+			startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS);
 		}
 		else 
 		{
@@ -483,13 +455,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void connectionStateChanged(MPDConnectionStateChangedEvent event) {
-
+		ad.dismiss();
 		String mpdVersion = oMPDAsyncHelper.oMPD.getMpdVersion();
 		StringBuffer stringBuffer = new StringBuffer(100);
 		stringBuffer.append("MPD version " + mpdVersion + " running at " +"" + "\n");
 		mainInfo.setText(stringBuffer.toString());
 		setTitle("PMix");
-		
 		myLogger.log(Level.INFO, "Connection State: " + event.toString());
 	}
 
@@ -529,30 +500,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				ImageButton button = (ImageButton) findViewById(R.id.playpause);
 				button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
 			}
-			// In some cases state is null (disconnect from server or somewhat similar...)
-			// In my opinion its not how JMPDComm should behave, so we may have to fix it there...
-			/*
-			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
-			{
-				this.runOnUiThread(new Runnable(){
-					public void run() {
-						ImageButton button = (ImageButton) findViewById(R.id.playpause);
-						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
-						
-					}
-				});
-			}
-			else
-			{
-				this.runOnUiThread(new Runnable(){
-					public void run() {
-						ImageButton button = (ImageButton) findViewById(R.id.playpause);
-						button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
-						
-					}
-				});
-			}
-			*/
 		}
 	}
 	private String lastArtist = "";
@@ -566,18 +513,24 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			if(state != null)
 			{
 				int songId = status.getSongPos();
-				if(songId>0)
+				if(songId>=0)
 				{
 					
 					Music actSong = oMPDAsyncHelper.oMPD.getPlaylist().getMusic(songId);
 					String artist = actSong.getArtist();
+					String title = actSong.getTitle();
 					String album = actSong.getAlbum();
+					artist = artist==null ? "" : artist;
+					title = title==null ? "" : title;
+					album = album==null ? "" : album;
 					artistNameText.setText(artist);
-					songNameText.setText(actSong.getTitle());
+					songNameText.setText(title);
 					albumNameText.setText(album);
 					progressBarTrack.setMax((int)actSong.getTime());
 					if(!lastAlbum.equals(album) || !lastArtist.equals(artist))
 					{
+						coverSwitcher.setVisibility(ImageSwitcher.INVISIBLE);
+						coverSwitcherProgress.setVisibility(ProgressBar.VISIBLE);
 						oCoverAsyncHelper.downloadCover(artist, album);
 						lastArtist = artist;
 						lastAlbum = album;
@@ -606,6 +559,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		oMPDAsyncHelper.stopMonitor();
 		/*
 		myLogger.log(Level.INFO, "onPause");
 		if(monitor != null)
@@ -613,7 +567,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		monitor = null;
 		Contexte.getInstance().disconnect();
 		*/
-		myLogger.log(Level.INFO, "Monitor closed");
 		
 	}
 
@@ -626,6 +579,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		oMPDAsyncHelper.disconnect();
 		myLogger.log(Level.INFO, "onDestroy");
 	}
 	
@@ -692,14 +646,53 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	@Override
 	public void onCoverDownloaded(Bitmap cover) {
+		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		coverSwitcher.setImageDrawable(new BitmapDrawable(cover));
+		coverSwitcher.setVisibility(ImageSwitcher.VISIBLE);
 		
 	}
 
 	@Override
 	public void onCoverNotFound() {
+		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		coverSwitcher.setImageResource(R.drawable.gmpcnocover);
+		coverSwitcher.setVisibility(ImageSwitcher.VISIBLE);
 		
+	}
+
+	private DialogClickListener oDialogClickListener;
+	@Override
+	public void connectionFailed(String message) {
+		oDialogClickListener = new DialogClickListener();
+		AlertDialog.Builder test = new AlertDialog.Builder(this);
+		test.setTitle("Connection Failed");
+		test.setMessage("Connection to MPD-Server failed! Check if the Server is running and reachable.");
+		test.setNegativeButton("Exit", oDialogClickListener);
+		test.setNeutralButton("Settings", oDialogClickListener);
+		test.setPositiveButton("Retry", oDialogClickListener);
+		ad.dismiss();
+		ad = test.show();
+		
+	}
+	
+	private class DialogClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			switch(which) {
+				case AlertDialog.BUTTON3:
+					// Show Settings
+					MainMenuActivity.this.startActivityForResult(new Intent(MainMenuActivity.this, SettingsActivity.class), SETTINGS);
+					break;
+				case AlertDialog.BUTTON2:
+					MainMenuActivity.this.finish();
+					break;
+				case AlertDialog.BUTTON1:
+					connectMPD();
+					break;
+					
+			}
+		}
 	}
 	
 	

@@ -30,35 +30,53 @@ import android.os.Message;
  *
  */
 public class MPDAsyncHelper extends Handler {
+	
 	private static final int EVENT_CONNECT = 0;
 	private static final int EVENT_DISCONNECT = 1;
-	private static final int EVENT_CONNECTIONSTATE = 2;
-	private static final int EVENT_PLAYLIST = 3;
-	private static final int EVENT_RANDOM = 4;
-	private static final int EVENT_REPEAT = 5;
-	private static final int EVENT_STATE = 6;
-	private static final int EVENT_TRACK = 7;
-	private static final int EVENT_UPDATESTATE = 8;
-	private static final int EVENT_VOLUME = 9;
-	private static final int EVENT_TRACKPOSITION = 10;
+	private static final int EVENT_CONNECTFAILED = 2;
+	private static final int EVENT_STARTMONITOR = 3;
+	private static final int EVENT_STOPMONITOR = 4;
+	private static final int EVENT_LOADARTIST = 1;
+	
+	
+	private static final int EVENT_CONNECTIONSTATE = 11;
+	private static final int EVENT_PLAYLIST = 12;
+	private static final int EVENT_RANDOM = 13;
+	private static final int EVENT_REPEAT = 14;
+	private static final int EVENT_STATE = 15;
+	private static final int EVENT_TRACK = 16;
+	private static final int EVENT_UPDATESTATE = 17;
+	private static final int EVENT_VOLUME = 18;
+	private static final int EVENT_TRACKPOSITION = 19;
 	
 	
 	private MPDAsyncWorker oMPDAsyncWorker;
 	private HandlerThread oMPDAsyncWorkerThread;
 	public MPD oMPD;
+
+	public interface ConnectionListener {
+		public void connectionFailed(String message);
+	}
 	
+    private Collection<ConnectionListener> connectionListners;
     private Collection<StatusChangeListener> statusChangedListeners;
     private Collection<TrackPositionListener> trackPositionListeners;
 	
+
+	private MPDConnectionInfo conInfo;
+    
 	/**
 	 * Private constructor for static class
 	 */
 	public MPDAsyncHelper() {	
+ 		oMPD = new MPD();
 		oMPDAsyncWorkerThread = new HandlerThread("MPDAsyncWorker");
 		oMPDAsyncWorkerThread.start();
 		oMPDAsyncWorker = new MPDAsyncWorker(oMPDAsyncWorkerThread.getLooper());
+		connectionListners = new LinkedList<ConnectionListener>();
         statusChangedListeners = new LinkedList<StatusChangeListener>();
         trackPositionListeners = new LinkedList<TrackPositionListener>();
+        conInfo = new MPDConnectionInfo();
 	}
 
 	 public void handleMessage(Message msg) {
@@ -100,6 +118,10 @@ public class MPDAsyncHelper extends Handler {
 		 		for(TrackPositionListener listener : trackPositionListeners)
 		 			listener.trackPositionChanged((MPDTrackPositionChangedEvent)msg.obj);
 		 		break;
+		 	case EVENT_CONNECTFAILED:
+		 		for(ConnectionListener listener : connectionListners)
+		 			listener.connectionFailed((String)msg.obj);
+		 		break;
 		 }
 	 }
 	 
@@ -109,14 +131,25 @@ public class MPDAsyncHelper extends Handler {
 	 * @param iPort
 	 * @param sPassword
 	 */
-	public void doConnect(String sServer, int iPort, String sPassword)
+	public void setConnectionInfo(String sServer, int iPort, String sPassword)
 	{
-		MPDConnectionInfo conInfo = new MPDConnectionInfo();
 		conInfo.sServer = sServer;
 		conInfo.iPort = iPort;
 		conInfo.sPassword = sPassword;
+	}
+	public void doConnect()
+	{
 		oMPDAsyncWorker.obtainMessage(EVENT_CONNECT, conInfo).sendToTarget();
 	}
+	public void startMonitor()
+	{
+		oMPDAsyncWorker.obtainMessage(EVENT_STARTMONITOR).sendToTarget();
+	}
+	public void stopMonitor()
+	{
+		oMPDAsyncWorker.obtainMessage(EVENT_STOPMONITOR).sendToTarget();
+	}
+	
 	public void disconnect()
 	{
 		oMPDAsyncWorker.obtainMessage(EVENT_DISCONNECT).sendToTarget();
@@ -130,6 +163,10 @@ public class MPDAsyncHelper extends Handler {
 	{
 		trackPositionListeners.add(listener);
 	}
+	public void addConnectionListener(ConnectionListener listener)
+	{
+		connectionListners.add(listener);
+	}
 	
 	public class MPDAsyncWorker extends Handler implements StatusChangeListener, TrackPositionListener {
 		private MPDStatusMonitor monitor;
@@ -139,33 +176,39 @@ public class MPDAsyncHelper extends Handler {
 		}
 
 		 public void handleMessage(Message msg) {
-
-		 	try {
-			 switch (msg.what) 
-			 {
+			 switch (msg.what) {
 			 	case EVENT_CONNECT:
-			 		MPDConnectionInfo conInfo = (MPDConnectionInfo)msg.obj;
-			 		oMPD = new MPD();
-			 		oMPD.connect(conInfo.sServer);
+				 	try {
+				 		MPDConnectionInfo conInfo = (MPDConnectionInfo)msg.obj;
+				 		oMPD.connect(conInfo.sServer, conInfo.iPort);
+				 		if(!conInfo.sPassword.equals(""))
+				 			oMPD.password(conInfo.sPassword);
+				 			
+					} catch (MPDServerException e) {
+						MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, e.getMessage()).sendToTarget();
+					}
+					break;
+			 	case EVENT_STARTMONITOR:
 					monitor = new MPDStatusMonitor(oMPD, 1000);
-					monitor.addStatusChangeListener(oMPDAsyncWorker);
-					monitor.addTrackPositionListener(oMPDAsyncWorker);
+					monitor.addStatusChangeListener(this);
+					monitor.addTrackPositionListener(this);
 					monitor.start();
 					break;
-			 	case EVENT_DISCONNECT:
+			 	case EVENT_STOPMONITOR:
 			 		monitor.giveup();
-			 		oMPD.disconnect();
+			 		break;
+			 	case EVENT_DISCONNECT:
+			 		try {
+						oMPD.disconnect();
+					} catch (MPDServerException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			 		break;
 			 		
 				default:
-				
-			 
+					break;
 			 }
-
-			} catch (MPDServerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		 }
 
 		// Send all events as Messages back to the GUI-Thread

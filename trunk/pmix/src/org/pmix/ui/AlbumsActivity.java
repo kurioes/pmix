@@ -122,6 +122,7 @@ public class AlbumsActivity extends ListActivity {
 
 		case MAIN:
 			i = new Intent(this, MainMenuActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			return true;
 		case PLAYLIST:
