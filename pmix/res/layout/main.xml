@@ -13,24 +13,24 @@
 		
 		<TextView android:id="@+id/songName" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="" android:gravity="center"/>	
-		
-	<ImageSwitcher android:id="@+id/albumCover"
+
+	<AbsoluteLayout android:id="@+id/absolutLayout"
 			android:layout_width="150px"
 			android:layout_height="150px"
-			android:padding="10px"
-			android:scaleType="fitCenter"
-			android:background="#00FF0000"
-			android:layout_alignParentTop="true"
-			android:layout_alignParentLeft="true" />
-<!-- By sag
-	 
-	<ProgressBar android:id="@+id/albumCoverProgress"
-			android:layout_width="150px"
-			android:layout_height="150px"
-			android:padding="10px"
-			android:visible="false"
-			android:layout_alignParentTop="@+id/albumCover" />	
- -->
+			android:padding="10px">
+		<ImageSwitcher android:id="@+id/albumCover"
+				android:layout_width="150px"
+				android:layout_height="150px"
+				android:layout_x="0px"
+				android:layout_y="0px" />
+		<ProgressBar android:id="@+id/albumCoverProgress"
+				android:layout_width="120px"
+				android:layout_height="120px"
+				android:layout_x="15px"
+				android:layout_y="15px"
+				android:visible="false"
+				android:layout_alignParentTop="@+id/albumCover" />	
+ 	</AbsoluteLayout>
 	<LinearLayout android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:gravity="center"

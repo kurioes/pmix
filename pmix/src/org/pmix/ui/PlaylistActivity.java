@@ -10,7 +10,6 @@ import org.a0z.mpd.MPD;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDServerException;
-import org.pmix.ui.Contexte;
 
 import android.app.Activity;
 import android.app.ListActivity;
@@ -39,8 +38,8 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-			setContentView(R.layout.artists);
-		
+		setContentView(R.layout.artists);
+		Logger.getAnonymousLogger().log(Level.INFO, "onCreate - Playlist");
 		try {
 			MPDPlaylist playlist = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist();
 			playlist.refresh();
@@ -65,7 +64,12 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		ListView list = getListView();
 		registerForContextMenu(list);
 	}
-
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		Logger.getAnonymousLogger().log(Level.INFO, "onStart - Playlist");
+	}
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -116,6 +120,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		switch (item.getItemId()) {
 		case MAIN:
 			Intent i = new Intent(this, MainMenuActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			return true;
 		case CLEAR:
