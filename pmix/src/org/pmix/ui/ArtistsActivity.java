@@ -49,7 +49,7 @@ public class ArtistsActivity extends ListActivity {
 			public void run() {
 				try {
 					if(items == null)
-						items = (List)Contexte.getInstance().getMpd().listArtists();
+						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listArtists();
 					runOnUiThread(new Runnable(){
 						// Sets Album data to the UI...
 						public void run() {
@@ -79,8 +79,8 @@ public class ArtistsActivity extends ListActivity {
 			private String artist;
 			public boolean onMenuItemClick(MenuItem item) {
 				try {
-					ArrayList<Music> songs = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ARTIST, artist));
-					Contexte.getInstance().getMpd().getPlaylist().add(songs);
+					ArrayList<Music> songs = new ArrayList<Music>(MainMenuActivity.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ARTIST, artist));
+					MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
 					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.artistAdded), artist), ArtistsActivity.this);
 				} catch (MPDServerException e) {
 					// TODO Auto-generated catch block

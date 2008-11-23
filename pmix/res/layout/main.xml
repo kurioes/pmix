@@ -18,6 +18,8 @@
 			android:layout_width="150px"
 			android:layout_height="150px"
 			android:padding="10px"
+			android:scaleType="fitCenter"
+			android:background="#00FF0000"
 			android:layout_alignParentTop="true"
 			android:layout_alignParentLeft="true" />
 <!-- By sag

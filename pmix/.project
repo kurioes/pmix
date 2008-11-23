@@ -3,6 +3,7 @@
 	<name>pmix</name>
 	<comment></comment>
 	<projects>
+		<project>JMPDComm</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -34,13 +34,13 @@ public class SongsActivity extends ListActivity {
 		try {
 			String album = (String) this.getIntent().getStringExtra("album");
 			this.setTitle(album);
-			musics = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ALBUM, album));
+			musics = new ArrayList<Music>(MainMenuActivity.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
 
 			for (Music music : musics) {
 				items.add(music.getTitle());
 			}
 
-			// items.addAll(Contexte.getInstance().getMpd()..listAlbums(artist));
+			// items.addAll(MainMenuActivity.oMPDAsyncHelper.oMPD..listAlbums(artist));
 
 			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
 			setListAdapter(notes);
@@ -60,18 +60,18 @@ public class SongsActivity extends ListActivity {
 			int songId = -1;
 			// try to find it in the current playlist first
 
-			//Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().find("filename", music.getFullpath());
+			//Collection<Music> founds = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().find("filename", music.getFullpath());
 			
 			// not found
 			//if (founds.isEmpty()) {
 				//songId = 
-				Contexte.getInstance().getMpd().getPlaylist().add(music);
+				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
 			//} else {
 				// found
 			//	songId = founds.toArray(new Music[founds.size()])[0].getSongId();
 			//}
 			if (songId > -1) {
-				Contexte.getInstance().getMpd().skipTo(songId);
+				MainMenuActivity.oMPDAsyncHelper.oMPD.skipTo(songId);
 			}
 			
 		} catch (MPDServerException e) {
