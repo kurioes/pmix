@@ -1,15 +1,16 @@
 package org.pmix.ui;
 
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.Serializable;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDConnectionException;
+import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.MPDStatusMonitor;
+import org.a0z.mpd.Music;
 import org.a0z.mpd.event.MPDConnectionStateChangedEvent;
 import org.a0z.mpd.event.MPDPlaylistChangedEvent;
 import org.a0z.mpd.event.MPDRandomChangedEvent;
@@ -21,6 +22,7 @@ import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
 import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 import org.a0z.mpd.event.TrackPositionListener;
+import org.pmix.ui.CoverAsyncHelper.CoverDownloadListener;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -29,6 +31,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Message;
@@ -43,10 +47,12 @@ import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar;
+import android.widget.ViewSwitcher.ViewFactory;
 
 
 /**
@@ -54,7 +60,7 @@ import android.widget.SeekBar;
  * @author Rémi Flament, Stefan Agner
  * @version $Id:  $
  */
-public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener, OnSharedPreferenceChangeListener {
+public class MainMenuActivity extends Activity implements StatusChangeListener, TrackPositionListener, OnSharedPreferenceChangeListener, CoverDownloadListener {
 
 	private Logger myLogger = Logger.global;
 	
@@ -72,7 +78,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private TextView albumNameText;
 
-	private MPDStatusMonitor monitor;
 
 	public static final int ALBUMS = 4;
 
@@ -85,8 +90,10 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private TextView trackTime = null;
 
-	private MyHandler handler;
-
+	private CoverAsyncHelper oCoverAsyncHelper = null;
+	long lastSongTime = 0;
+	long lastElapsedTime = 0;
+	
 	private ImageSwitcher coverSwitcher;
 
 	private ProgressBar coverSwitcherProgress;
@@ -97,7 +104,10 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static Toast notification = null;
 	
-	private Collection artists = null;
+	private ButtonEventHandler buttonEventHandler;
+	
+	// Change this... (sag)
+	public static MPDAsyncHelper oMPDAsyncHelper = null;
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -118,13 +128,75 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		super.onRestart();
 		myLogger.log(Level.INFO, "onRestart");
 	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		oMPDAsyncHelper = new MPDAsyncHelper();
+		oMPDAsyncHelper.addStatusChangeListener(this);
+		oMPDAsyncHelper.addTrackPositionListener(this);
+	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		String serverAdress = Contexte.getInstance().getServerAddress();
-		if(serverAdress.equals(""))
-			return;
+		
+		// Get Settings and Connect...
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
+		settings.registerOnSharedPreferenceChangeListener(this);
+		String sServer = settings.getString("hostname", "");
+		int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
+		String sPassword = settings.getString("password", "");
+		oMPDAsyncHelper.doConnect(sServer, iPort, sPassword);
+		
+		/*
+		Contexte.getInstance().start();
+		
+		Runnable runConnect = new Runnable() {
+
+			@Override
+			public void run() {
+
+				String serverAdress = Contexte.getInstance().getServerAddress();
+				if(serverAdress.equals(""))
+					return;
+				boolean tryagain = true;
+				while(tryagain) 
+				{
+					myLogger.log(Level.INFO, "onResume");
+					try {
+						Contexte.getInstance().disconnect(); // This is needed in case whe were in standby in another Activity...
+						String mpdVersion = MainMenuActivity.oMPDAsyncHelper.oMPD.getMpdVersion();
+						
+						mainInfo.setText(stringBuffer.toString());
+						MPDStatus state = MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus();
+						MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().refresh();
+						monitor = new MPDStatusMonitor(MainMenuActivity.oMPDAsyncHelper.oMPD, 1000);
+						monitor.addStatusChangeListener(MainMenuActivity.this);
+						monitor.addTrackPositionListener(MainMenuActivity.this);
+						monitor.start();
+						setTitle("PMix");
+						myLogger.log(Level.INFO, "Monitor started");
+						tryagain = false;
+					} catch (MPDConnectionException e) {
+						tryagain = true;
+					} catch (MPDServerException e) {
+						setTitle("Error");
+						tryagain = false;
+						myLogger.log(Level.WARNING, "Initialization failed... ");
+						if(e.getMessage().startsWith("The operation timed") && !tryagain)
+							tryagain = true;
+						mainInfo.setText(e.getMessage()+" "+e.getClass());
+					}
+				}
+			}
+			
+		};
+		
+		
+		Message myMsg = Message.obtain(Contexte.getInstance(), runConnect);
+		*/
+		
 		/*
 		WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 		int wifistate = wifi.getWifiState();
@@ -136,36 +208,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		while(wifistate!=wifi.WIFI_STATE_ENABLED)
 			setTitle("Waiting for WIFI");
 			*/
-		boolean tryagain = true;
-		while(tryagain) 
-		{
-			myLogger.log(Level.INFO, "onResume");
-			try {
-				Contexte.getInstance().disconnect(); // This is needed in case whe were in standby in another Activity...
-				String mpdVersion = Contexte.getInstance().getMpd().getMpdVersion();
-				StringBuffer stringBuffer = new StringBuffer(100);
-				stringBuffer.append("\nMPD version " + mpdVersion + " running at " + serverAdress + "\n");
-				mainInfo.setText(stringBuffer.toString());
-				MPDStatus state = Contexte.getInstance().getMpd().getStatus();
-				Contexte.getInstance().getMpd().getPlaylist().refresh();
-				monitor = new MPDStatusMonitor(Contexte.getInstance().getMpd(), 1000);
-				monitor.addStatusChangeListener(this);
-				monitor.addTrackPositionListener(this);
-				monitor.start();
-				setTitle("PMix");
-				myLogger.log(Level.INFO, "Monitor started");
-				tryagain = false;
-			} catch (MPDConnectionException e) {
-				tryagain = true;
-			} catch (MPDServerException e) {
-				setTitle("Error");
-				tryagain = false;
-				myLogger.log(Level.WARNING, "Initialization failed... ");
-				if(e.getMessage().startsWith("The operation timed") && !tryagain)
-					tryagain = true;
-				mainInfo.setText(e.getMessage()+" "+e.getClass());
-			}
-		}
+		/*
+		
+		*/
 
 		
 	}
@@ -183,110 +228,48 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 		trackTime = (TextView) findViewById(R.id.trackTime);
 
-		// Initial Connect => Set Host in Context (TODO: fix, this is ugly)
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
-		settings.registerOnSharedPreferenceChangeListener(this);
-		Contexte.getInstance().setServerAddress(settings.getString("hostname", ""));
-		try {
-			Contexte.getInstance().setServerPort(Integer.parseInt(settings.getString("port", "6600")));
-		} catch (NumberFormatException e) {
-			Contexte.getInstance().setServerPort(6600);
-		}
-		Contexte.getInstance().setServerPassword(settings.getString("password", ""));
 		
 		coverSwitcher = (ImageSwitcher) findViewById(R.id.albumCover);
+		coverSwitcher.setFactory(new ViewFactory() {
+
+			public View makeView() {
+				ImageView i = new ImageView(MainMenuActivity.this);
+
+				i.setBackgroundColor(0x00FF0000);
+				i.setScaleType(ImageView.ScaleType.FIT_CENTER);
+				//i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+
+				
+				return i;
+			}
+		});
 		/* sag, would like to implement a loading Progress
 		coverSwitcherProgress = (ProgressBar) findViewById(R.id.albumCoverProgress); 
 		coverSwitcherProgress.setIndeterminate(true);
 		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
-		*/
+		
+		
 		handler = new MyHandler(this);
 		coverSwitcher.setFactory(handler);
-
+		*/
+		oCoverAsyncHelper = new CoverAsyncHelper();
+		oCoverAsyncHelper.addCoverDownloadListener(this);
+		buttonEventHandler = new ButtonEventHandler();
 		ImageButton button = (ImageButton) findViewById(R.id.next);
-		button.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-
-				try {
-					Contexte.getInstance().getMpd().next();
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
+		button.setOnClickListener(buttonEventHandler);
+		
 		button = (ImageButton) findViewById(R.id.prev);
-		button.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				try {
-					Contexte.getInstance().getMpd().previous();
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		button.setOnClickListener(buttonEventHandler);
 
 		button = (ImageButton) findViewById(R.id.back);
-		button.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-
-				try {
-					Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() - TRACK_STEP);
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		button.setOnClickListener(buttonEventHandler);
 
 		button = (ImageButton) findViewById(R.id.playpause);
-		button.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-
-				try {
-					/**
-					 * If playing or paused, just toggle state, otherwise start playing.
-					 * @author slubman
-					 */
-					if(Contexte.getInstance().getMpd().getStatus().getState().equals(MPDStatus.MPD_STATE_PLAYING)
-						|| Contexte.getInstance().getMpd().getStatus().getState().equals(MPDStatus.MPD_STATE_PAUSED)) {
-						Contexte.getInstance().getMpd().pause();
-					} else {
-						Contexte.getInstance().getMpd().play();
-					}
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		button.setOnClickListener(buttonEventHandler);
+		button.setOnLongClickListener(buttonEventHandler);
 		
-		/**
-		 * Add the ability to stop playing (may be useful for streams)
-		 * @author slubman
-		 */
-		button.setOnLongClickListener(new Button.OnLongClickListener() {
-
-			public boolean onLongClick(View v) {
-				try {
-					Contexte.getInstance().getMpd().stop();
-				} catch (MPDServerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return true;
-			}
-			
-		});
-
 		button = (ImageButton) findViewById(R.id.forward);
-		button.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				try {
-					Contexte.getInstance().getMpd().seek(handler.getLastKnownElapsedTime() + TRACK_STEP);
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		button.setOnClickListener(buttonEventHandler);
 
 		progressBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 			public void onProgressChanged(SeekBar seekBar, int progress,
@@ -294,7 +277,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				if(fromTouch)
 				{
 					try {
-						Contexte.getInstance().getMpd().setVolume(progress);
+						oMPDAsyncHelper.oMPD.setVolume(progress);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -318,10 +301,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 					boolean fromTouch) {
 				if(fromTouch)
 				{
-
 					try {
-						int position = (progress * handler.getCurrentSongTime()) / 100;
-						Contexte.getInstance().getMpd().seek(position);
+						oMPDAsyncHelper.oMPD.seek((int)progress);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -340,11 +321,74 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			}
 		});
 		
-		myLogger.log(Level.WARNING, "Initialization succeeded");
-
-		
+		myLogger.log(Level.INFO, "Initialization succeeded");
 	}
 
+	private class ButtonEventHandler implements Button.OnClickListener, Button.OnLongClickListener {
+
+		@Override
+		public void onClick(View v) {
+			MPD mpd = oMPDAsyncHelper.oMPD;
+			try {
+				switch(v.getId()) {
+					case R.id.next:
+						mpd.next();
+						break;
+					case R.id.prev:
+						mpd.previous();
+						break;
+					case R.id.back:
+						mpd.seek(lastElapsedTime - TRACK_STEP);
+						break;
+					case R.id.forward:
+						mpd.seek(lastElapsedTime + TRACK_STEP);
+						break;
+					case R.id.playpause:
+						/**
+						 * If playing or paused, just toggle state, otherwise start playing.
+						 * @author slubman
+						 */
+						String state = mpd.getStatus().getState();
+						if(state.equals(MPDStatus.MPD_STATE_PLAYING)
+							|| state.equals(MPDStatus.MPD_STATE_PAUSED)) {
+							mpd.pause();
+						} else {
+							mpd.play();
+						}
+						break;
+
+				}
+			
+			} catch (MPDServerException e) {
+				myLogger.log(Level.WARNING, e.getMessage());
+			}
+		}
+
+		@Override
+		public boolean onLongClick(View v) {
+			MPD mpd = oMPDAsyncHelper.oMPD;
+			try {
+				switch(v.getId()) {
+					case R.id.playpause:
+						// Implements the ability to stop playing (may be useful for streams)
+						mpd.stop();
+						break;
+					default:
+						return false;
+				}
+				return true;
+			} catch (MPDServerException e) {
+				
+			}
+			return true;
+		}
+		
+		
+	}
+	
+	
+	
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// mainInfo.setText(keyCode + "");
@@ -352,17 +396,17 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
 				progressBarVolume.incrementProgressBy(VOLUME_STEP);
-				Contexte.getInstance().getMpd().adjustVolume(VOLUME_STEP);
+				oMPDAsyncHelper.oMPD.adjustVolume(VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
 				progressBarVolume.incrementProgressBy(-VOLUME_STEP);
-				Contexte.getInstance().getMpd().adjustVolume(-VOLUME_STEP);
+				oMPDAsyncHelper.oMPD.adjustVolume(-VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
-				Contexte.getInstance().getMpd().previous();
+				oMPDAsyncHelper.oMPD.previous();
 				return true;
 			case KeyEvent.KEYCODE_DPAD_RIGHT:
-				Contexte.getInstance().getMpd().next();
+				oMPDAsyncHelper.oMPD.next();
 				return true;
 			default:
 				return false;
@@ -439,11 +483,24 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void connectionStateChanged(MPDConnectionStateChangedEvent event) {
+
+		String mpdVersion = oMPDAsyncHelper.oMPD.getMpdVersion();
+		StringBuffer stringBuffer = new StringBuffer(100);
+		stringBuffer.append("MPD version " + mpdVersion + " running at " +"" + "\n");
+		mainInfo.setText(stringBuffer.toString());
+		setTitle("PMix");
+		
 		myLogger.log(Level.INFO, "Connection State: " + event.toString());
 	}
 
+	//private MPDPlaylist playlist;
 	public void playlistChanged(MPDPlaylistChangedEvent event) {
-		// TODO Auto-generated method stub
+		try {
+			oMPDAsyncHelper.oMPD.getPlaylist().refresh();
+		} catch (MPDServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -459,11 +516,22 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public void stateChanged(MPDStateChangedEvent event) {
 		MPDStatus status = event.getMpdStatus();
+		
 		String state = status.getState();
 		if(state!=null)
 		{
+
+			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
+			{
+				ImageButton button = (ImageButton) findViewById(R.id.playpause);
+				button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
+			} else {
+				ImageButton button = (ImageButton) findViewById(R.id.playpause);
+				button.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+			}
 			// In some cases state is null (disconnect from server or somewhat similar...)
 			// In my opinion its not how JMPDComm should behave, so we may have to fix it there...
+			/*
 			if(state.equals(MPDStatus.MPD_STATE_PLAYING))
 			{
 				this.runOnUiThread(new Runnable(){
@@ -484,40 +552,46 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 					}
 				});
 			}
+			*/
 		}
 	}
-
+	private String lastArtist = "";
+	private String lastAlbum = "";
 	public void trackChanged(MPDTrackChangedEvent event) {
+
 		MPDStatus status = event.getMpdStatus();
 		if(status!=null)
 		{
 			String state = status.getState();
 			if(state != null)
 			{
-				if (state.equals(MPDStatus.MPD_STATE_PLAYING)) {
-					Message message = Message.obtain();
-					message.obj = status;
-					handler.sendMessage(message);
+				int songId = status.getSongPos();
+				if(songId>0)
+				{
+					
+					Music actSong = oMPDAsyncHelper.oMPD.getPlaylist().getMusic(songId);
+					String artist = actSong.getArtist();
+					String album = actSong.getAlbum();
+					artistNameText.setText(artist);
+					songNameText.setText(actSong.getTitle());
+					albumNameText.setText(album);
+					progressBarTrack.setMax((int)actSong.getTime());
+					if(!lastAlbum.equals(album) || !lastArtist.equals(artist))
+					{
+						oCoverAsyncHelper.downloadCover(artist, album);
+						lastArtist = artist;
+						lastAlbum = album;
+					}
+				}
+				else
+				{
+					artistNameText.setText("");
+					songNameText.setText("");
+					albumNameText.setText("");
+					progressBarTrack.setMax(0);
 				}
 			}
-			else
-			{
-				if(monitor != null)
-					monitor.giveup();
-				monitor = null;
-				Contexte.getInstance().disconnect();
-				// Connection is likly dropped (MPD restarted)
-				runOnUiThread(new Runnable(){
-					public void run() {
-						onResume();
-					}
-				});
-			}
 		}
-	}
-
-	public TextView getMainInfo() {
-		return mainInfo;
 	}
 
 	public void updateStateChanged(MPDUpdateStateChangedEvent event) {
@@ -526,22 +600,19 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void volumeChanged(MPDVolumeChangedEvent event) {
-		MPDStatus status = event.getMpdStatus();
-
-		Message message = Message.obtain();
-		message.obj = status;
-		handler.sendMessage(message);
-
+		progressBarVolume.setProgress(event.getMpdStatus().getVolume());
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		/*
 		myLogger.log(Level.INFO, "onPause");
 		if(monitor != null)
 			monitor.giveup();
 		monitor = null;
 		Contexte.getInstance().disconnect();
+		*/
 		myLogger.log(Level.INFO, "Monitor closed");
 		
 	}
@@ -570,38 +641,27 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public void trackPositionChanged(MPDTrackPositionChangedEvent event) {
 		MPDStatus status = event.getMpdStatus();
-
-		Message message = Message.obtain();
-		message.obj = status;
-		handler.sendMessage(message);
-
+		lastElapsedTime = status.getElapsedTime();
+		lastSongTime = status.getTotalTime();
+		trackTime.setText(timeToString(lastElapsedTime) + " - " + timeToString(lastSongTime));
+		progressBarTrack.setProgress((int) status.getElapsedTime());
 	}
 
-	public TextView getTrackTime() {
-		return trackTime;
-	}
 
-	public ImageSwitcher getCoverSwitcher() {
-		return coverSwitcher;
-
+	private static String timeToString(long seconds) {
+		long min = seconds / 60;
+		long sec = seconds - min * 60;
+		return (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
 	}
-
-	public TextView getArtistNameText() {
-		return artistNameText;
-	}
-
-	public TextView getSongNameText() {
-		return songNameText;
-	}
-
-	public TextView getAlbumNameText() {
-		return albumNameText;
-	}
+	
 
 
 	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
+		
 		if(settings.contains("hostname") || settings.contains("port") || settings.contains("password"))
 		{
+			
+			/*
 			Contexte.getInstance().setServerAddress(settings.getString("hostname", ""));
 			try {
 				Contexte.getInstance().setServerPort(Integer.parseInt(settings.getString("port", "6600")));
@@ -609,6 +669,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				Contexte.getInstance().setServerPort(6600);
 			}
 			Contexte.getInstance().setServerPassword(settings.getString("password", ""));
+			*/
 		}
 		
 	}
@@ -628,6 +689,18 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
                     notification.show();
             }
     }
+
+	@Override
+	public void onCoverDownloaded(Bitmap cover) {
+		coverSwitcher.setImageDrawable(new BitmapDrawable(cover));
+		
+	}
+
+	@Override
+	public void onCoverNotFound() {
+		coverSwitcher.setImageResource(R.drawable.gmpcnocover);
+		
+	}
 	
 	
 }

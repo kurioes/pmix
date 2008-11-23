@@ -46,9 +46,9 @@ public class AlbumsActivity extends ListActivity {
 			public void run() {
 				try {
 					if (getIntent().getStringExtra("artist") != null) {
-						items = (List)Contexte.getInstance().getMpd().listAlbums((String) getIntent().getStringExtra("artist"));
+						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listAlbums((String) getIntent().getStringExtra("artist"));
 					} else {
-						items = (List)Contexte.getInstance().getMpd().listAlbums();
+						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listAlbums();
 					}
 					pd.dismiss();
 					runOnUiThread(new Runnable(){
@@ -80,8 +80,8 @@ public class AlbumsActivity extends ListActivity {
 			private String album;
 			public boolean onMenuItemClick(MenuItem item) {
 				try {
-					ArrayList<Music> songs = new ArrayList<Music>(Contexte.getInstance().getMpd().find(MPD.MPD_FIND_ALBUM, album));
-					Contexte.getInstance().getMpd().getPlaylist().add(songs);
+					ArrayList<Music> songs = new ArrayList<Music>(MainMenuActivity.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
+					MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
 					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.albumAdded),album), AlbumsActivity.this);
 				} catch (MPDServerException e) {
 					// TODO Auto-generated catch block

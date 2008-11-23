@@ -42,7 +42,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 			setContentView(R.layout.artists);
 		
 		try {
-			MPDPlaylist playlist = Contexte.getInstance().getMpd().getPlaylist();
+			MPDPlaylist playlist = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist();
 			playlist.refresh();
 			musics = playlist.getMusics();
 			for(Music m : musics) {
@@ -83,9 +83,9 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		switch (item.getItemId()) {
 		case 0:
 			try {
-				Contexte.getInstance().getMpd().getPlaylist().removeSong(songId);
+				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().removeSong(songId);
 				songlist.remove(arrayListId); 
-				Contexte.getInstance().getMpd().getPlaylist().refresh(); // If not refreshed an intern Array of JMPDComm get out of sync and throws IndexOutOfBound
+				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().refresh(); // If not refreshed an intern Array of JMPDComm get out of sync and throws IndexOutOfBound
 				MainMenuActivity.notifyUser(getResources().getString(R.string.deletedSongFromPlaylist), this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 			} catch (MPDServerException e) {
@@ -120,7 +120,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 			return true;
 		case CLEAR:
 			try {
-				Contexte.getInstance().getMpd().getPlaylist().clear();
+				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().clear();
 				songlist.clear();
 				MainMenuActivity.notifyUser(getResources().getString(R.string.playlistCleared), this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
@@ -142,7 +142,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		// Play selected Song
 		Music m = musics.get(position);
 	    try {
-	    	Contexte.getInstance().getMpd().skipTo(m.getSongId());
+	    	MainMenuActivity.oMPDAsyncHelper.oMPD.skipTo(m.getSongId());
 	    } catch (MPDServerException e) {
 	    }
 			

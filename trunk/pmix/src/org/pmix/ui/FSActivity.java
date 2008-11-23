@@ -41,9 +41,9 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 		try {
 
 			if (this.getIntent().getStringExtra("directory") != null) {
-				currentDirectory = Contexte.getInstance().getMpd().getRootDirectory().makeDirectory((String) this.getIntent().getStringExtra("directory"));
+				currentDirectory = MainMenuActivity.oMPDAsyncHelper.oMPD.getRootDirectory().makeDirectory((String) this.getIntent().getStringExtra("directory"));
 			} else {
-				currentDirectory = Contexte.getInstance().getMpd().getRootDirectory();
+				currentDirectory = MainMenuActivity.oMPDAsyncHelper.oMPD.getRootDirectory();
 			}
 			currentDirectory.refreshData();
 
@@ -98,18 +98,18 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 				int songId = -1;
 				// try to find it in the current playlist first
 
-				//Collection<Music> founds = Contexte.getInstance().getMpd().getPlaylist().("filename", music.getFullpath());
+				//Collection<Music> founds = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().("filename", music.getFullpath());
 				
 				// not found
 				//if (founds.isEmpty()) {
-					Contexte.getInstance().getMpd().getPlaylist().add(music);
+					MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
 					//songId = 
 				//} else {
 					// found
 					//songId = founds.toArray(new Music[founds.size()])[0].getSongId();
 				//}
 				if (songId > -1) {
-					Contexte.getInstance().getMpd().skipTo(songId);
+					MainMenuActivity.oMPDAsyncHelper.oMPD.skipTo(songId);
 				}
 				
 			} catch (MPDServerException e) {
@@ -157,7 +157,7 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 	public boolean onMenuItemClick(MenuItem item) {
 		try {
 			Collection files = getAllFiles(currentContextDirectory);
-			Contexte.getInstance().getMpd().getPlaylist().add(files);
+			MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(files);
 			MainMenuActivity.notifyUser(getResources().getString(R.string.addedDirectoryToPlaylist), this);
 			//((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 		} catch (MPDServerException e) {
