@@ -75,6 +75,12 @@ public class MPD {
     private static final String MPD_CMD_VOLUME = "volume";
 
     private static final String MPD_CMD_SET_VOLUME = "setvol";
+    
+    private static final String MPD_CMD_OUTPUTS = "outputs";
+
+    private static final String MPD_CMD_OUTPUTENABLE = "enableoutput";
+    
+    private static final String MPD_CMD_OUTPUTDISABLE = "disableoutput";
 
     /**
      * MPD default TCP port.
@@ -712,4 +718,34 @@ public class MPD {
         args[0] = Integer.toString(value);
         mpdConnection.sendCommand(MPD_CMD_CROSSFADE, args);
     }
+    
+    /**
+     * 
+     * 
+     */
+    public Collection<MPDOutput> getOutputs() throws MPDServerException {
+    	Collection<MPDOutput> list = new LinkedList<MPDOutput>();
+        Iterator it = mpdConnection.sendCommand(MPD_CMD_OUTPUTS).iterator();
+        while (it.hasNext()) {
+        	MPDOutput out = new MPDOutput();
+        	out.setId(Integer.parseInt(((String) it.next()).split(": ")[1]));
+        	out.setName(((String) it.next()).split(": ")[1]);
+        	out.setEnabled(((String) it.next()).split(": ")[1].equals("1"));
+        	list.add(out);
+        }
+    	return list;
+    }
+
+    public void enableOutput(int id) throws MPDServerException {
+        String[] args = new String[1];
+        args[0] = Integer.toString(id);
+        mpdConnection.sendCommand(MPD_CMD_OUTPUTENABLE, args);
+    }
+    
+    public void disableOutput(int id) throws MPDServerException {
+        String[] args = new String[1];
+        args[0] = Integer.toString(id);
+        mpdConnection.sendCommand(MPD_CMD_OUTPUTDISABLE, args);
+    }
+    
 }

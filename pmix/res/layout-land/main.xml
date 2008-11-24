@@ -4,10 +4,16 @@
 
 <TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/artistName" android:textSize="25sp"></TextView>
 <TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/albumName" android:textSize="20sp"></TextView>
-<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/songName"></TextView><LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center"><AbsoluteLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/AbsoluteLayout"><ImageSwitcher android:layout_height="150px" android:layout_width="150px" android:id="@+id/albumCover" android:padding="10px">
+<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/songName"></TextView><LinearLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center">
 
-</ImageSwitcher><ProgressBar android:id="@+id/albumCoverProgress" android:layout_height="120px" android:layout_width="120px" android:layout_x="15px" android:layout_y="15px"></ProgressBar>
-</AbsoluteLayout><LinearLayout android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="fill_parent" android:layout_gravity="center_vertical"><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/trackTime" android:textSize="12sp"></TextView><TextView android:layout_height="wrap_content" android:text="@string/track" android:layout_width="fill_parent" android:gravity="center" android:textSize="12sp" android:id="@+id/track"></TextView><SeekBar android:layout_height="wrap_content" android:max="100" android:id="@+id/progress_track" android:layout_width="250dip" android:layout_gravity="center"></SeekBar><TextView android:layout_height="wrap_content" android:gravity="center" android:layout_width="fill_parent" android:text="@string/volume" android:textSize="12sp" android:id="@+id/volume"></TextView><SeekBar android:layout_height="wrap_content" android:id="@+id/progress_volume" android:layout_width="250dip" android:layout_gravity="center"></SeekBar>
+<AbsoluteLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/AbsoluteLayout">
+<ImageSwitcher android:layout_height="150px" 
+android:layout_width="150px" android:id="@+id/albumCover" android:padding="10px">
+
+</ImageSwitcher>
+<ProgressBar android:id="@+id/albumCoverProgress" android:layout_height="120px" android:layout_width="120px" android:layout_x="15px" android:layout_y="15px"></ProgressBar>
+</AbsoluteLayout>
+<LinearLayout android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="fill_parent" android:layout_gravity="center_vertical"><TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center" android:id="@+id/trackTime" android:textSize="12sp"></TextView><TextView android:layout_height="wrap_content" android:text="@string/track" android:layout_width="fill_parent" android:gravity="center" android:textSize="12sp" android:id="@+id/track"></TextView><SeekBar android:layout_height="wrap_content" android:max="100" android:id="@+id/progress_track" android:layout_width="250dip" android:layout_gravity="center"></SeekBar><TextView android:layout_height="wrap_content" android:gravity="center" android:layout_width="fill_parent" android:text="@string/volume" android:textSize="12sp" android:id="@+id/volume"></TextView><SeekBar android:layout_height="wrap_content" android:id="@+id/progress_volume" android:layout_width="250dip" android:layout_gravity="center"></SeekBar>
 
 </LinearLayout>
 

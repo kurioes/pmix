@@ -20,4 +20,6 @@
              android:summary="@string/passwordDescription" /> 
              />  
      </PreferenceCategory>  
+     <PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Outputs">  
+     </PreferenceCategory>  
 </PreferenceScreen>
