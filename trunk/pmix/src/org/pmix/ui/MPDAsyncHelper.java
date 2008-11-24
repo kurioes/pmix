@@ -212,52 +212,43 @@ public class MPDAsyncHelper extends Handler {
 		 }
 
 		// Send all events as Messages back to the GUI-Thread
-		@Override
 		public void connectionStateChanged(MPDConnectionStateChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTIONSTATE, event).sendToTarget();
 		}
 
-		@Override
 		public void playlistChanged(MPDPlaylistChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_PLAYLIST, event).sendToTarget();
 		}
 
-		@Override
 		public void randomChanged(MPDRandomChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_RANDOM, event).sendToTarget();
 		}
 
-		@Override
 		public void repeatChanged(MPDRepeatChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_REPEAT, event).sendToTarget();
 			
 		}
 
-		@Override
 		public void stateChanged(MPDStateChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_STATE, event).sendToTarget();
 			
 		}
 
-		@Override
 		public void trackChanged(MPDTrackChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_TRACK, event).sendToTarget();
 			
 		}
 
-		@Override
 		public void updateStateChanged(MPDUpdateStateChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_UPDATESTATE, event).sendToTarget();
 			
 		}
 
-		@Override
 		public void volumeChanged(MPDVolumeChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_VOLUME, event).sendToTarget();
 			
 		}
 
-		@Override
 		public void trackPositionChanged(MPDTrackPositionChangedEvent event) {
 			MPDAsyncHelper.this.obtainMessage(EVENT_TRACKPOSITION, event).sendToTarget();
 			

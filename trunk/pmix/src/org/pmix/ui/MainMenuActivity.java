@@ -298,7 +298,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private class ButtonEventHandler implements Button.OnClickListener, Button.OnLongClickListener {
 
-		@Override
 		public void onClick(View v) {
 			MPD mpd = oMPDAsyncHelper.oMPD;
 			try {
@@ -336,7 +335,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			}
 		}
 
-		@Override
 		public boolean onLongClick(View v) {
 			MPD mpd = oMPDAsyncHelper.oMPD;
 			try {
@@ -644,7 +642,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
             }
     }
 
-	@Override
 	public void onCoverDownloaded(Bitmap cover) {
 		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		coverSwitcher.setImageDrawable(new BitmapDrawable(cover));
@@ -652,7 +649,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		
 	}
 
-	@Override
 	public void onCoverNotFound() {
 		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		coverSwitcher.setImageResource(R.drawable.gmpcnocover);
@@ -661,7 +657,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	private DialogClickListener oDialogClickListener;
-	@Override
 	public void connectionFailed(String message) {
 		oDialogClickListener = new DialogClickListener();
 		AlertDialog.Builder test = new AlertDialog.Builder(this);
@@ -677,7 +672,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	
 	private class DialogClickListener implements OnClickListener {
 
-		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			switch(which) {
 				case AlertDialog.BUTTON3:
