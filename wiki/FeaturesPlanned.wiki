@@ -27,4 +27,5 @@ PMix is still in early development phase... There are several features we would 
   * Option for Random/Repeat mode
   * Menuitem to refresh directory (on MPD) in FSActivity
   * CoverFlow (Maybe, with OpenGL)
+  * Support MPD-Output *sag is working this*
   
