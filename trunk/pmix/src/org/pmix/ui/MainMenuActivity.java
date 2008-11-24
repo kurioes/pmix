@@ -453,13 +453,16 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	public void connectionStateChanged(MPDConnectionStateChangedEvent event) {
+		if(event.isConnected())
+		{
 		ad.dismiss();
-		String mpdVersion = oMPDAsyncHelper.oMPD.getMpdVersion();
-		StringBuffer stringBuffer = new StringBuffer(100);
-		stringBuffer.append("MPD version " + mpdVersion + " running at " +"" + "\n");
-		mainInfo.setText(stringBuffer.toString());
-		setTitle("PMix");
-		myLogger.log(Level.INFO, "Connection State: " + event.toString());
+			String mpdVersion = oMPDAsyncHelper.oMPD.getMpdVersion();
+			StringBuffer stringBuffer = new StringBuffer(100);
+			stringBuffer.append("MPD version " + mpdVersion + " running at " +"" + "\n");
+			mainInfo.setText(stringBuffer.toString());
+			setTitle("PMix");
+			myLogger.log(Level.INFO, "Connection State: " + event.toString());
+		}
 	}
 
 	//private MPDPlaylist playlist;

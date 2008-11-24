@@ -201,8 +201,7 @@ public class MPDAsyncHelper extends Handler {
 			 		try {
 						oMPD.disconnect();
 					} catch (MPDServerException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					} catch (NullPointerException ex) {
 					}
 			 		break;
 			 		

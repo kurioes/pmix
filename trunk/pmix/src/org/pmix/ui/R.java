@@ -23,6 +23,7 @@ public final class R {
         public static final int solid_red=0x7f020007;
     }
     public static final class id {
+        public static final int AbsoluteLayout=0x7f050012;
         public static final int absolutLayout=0x7f050004;
         public static final int albumCover=0x7f050005;
         public static final int albumCoverProgress=0x7f050006;
@@ -33,6 +34,7 @@ public final class R {
         public static final int mainInfo=0x7f050011;
         public static final int next=0x7f05000b;
         public static final int playpause=0x7f050009;
+        public static final int preferenceOutput=0x7f050013;
         public static final int prev=0x7f050007;
         public static final int progress_track=0x7f05000e;
         public static final int progress_volume=0x7f050010;
