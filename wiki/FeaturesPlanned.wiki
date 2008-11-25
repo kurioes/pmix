@@ -11,13 +11,13 @@ PMix is still in early development phase... There are several features we would 
   * Release on Android Market (Account opened by sag)
   * Stability! *partly done by sag/bpo*
   * Add Licence notice to source files
+  * Choose MPD-Outputs *done by sag*
 
 = Planned features for further releases =
   * Nicer browsing for Artists/Albums (maybe equal to Android Music Player)
-  * Choose MPD-Outputs
   * Add more than one MPD-Server
   * Connect only when WLAN is on (PMix is useless over internet, right?)
-  * Type Safety (mainly in JMPDComm)
+  * Type Safety (mainly in JMPDComm) *slubman is working on this*
   * Download Songs to Android (via Context Menu)
   * Save and Load Playlists
   * Slider for letters as in Contacts
