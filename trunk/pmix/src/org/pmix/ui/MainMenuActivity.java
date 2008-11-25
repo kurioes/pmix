@@ -87,8 +87,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public static final int FILES = 3;
 
-	private TextView mainInfo = null;
-
 	private SeekBar progressBarVolume = null;
 	private SeekBar progressBarTrack = null;
 
@@ -120,7 +118,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case SETTINGS:
-			init();
 			break;
 
 		default:
@@ -130,6 +127,37 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	}
 
 	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		myLogger.log(Level.INFO, "onCreate");
+		oMPDAsyncHelper = new MPDAsyncHelper();
+		oMPDAsyncHelper.addStatusChangeListener(this);
+		oMPDAsyncHelper.addTrackPositionListener(this);
+		oMPDAsyncHelper.addConnectionListener(this);
+
+		init();
+		
+		// Get Settings...
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
+		settings.registerOnSharedPreferenceChangeListener(this);
+		
+		if (settings.getString("hostname", "").equals("")) {
+			startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS);
+		}
+		else 
+		{
+
+			String sServer = settings.getString("hostname", "");
+			int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
+			String sPassword = settings.getString("password", "");
+			oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
+
+			connectMPD();
+		}
+
+	}
+	
+	@Override
 	protected void onRestart() {
 		super.onRestart();
 		myLogger.log(Level.INFO, "onRestart");
@@ -138,20 +166,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		oMPDAsyncHelper = new MPDAsyncHelper();
-		oMPDAsyncHelper.addStatusChangeListener(this);
-		oMPDAsyncHelper.addTrackPositionListener(this);
-		oMPDAsyncHelper.addConnectionListener(this);
-
-		// Get Settings...
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
-		settings.registerOnSharedPreferenceChangeListener(this);
-		String sServer = settings.getString("hostname", "");
-		int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
-		String sPassword = settings.getString("password", "");
-		oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
-
-		connectMPD();
 	}
 	
 	private void connectMPD()
@@ -166,8 +180,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		oMPDAsyncHelper.startMonitor();
-		oMPDAsyncHelper.stopMonitor();
 		oMPDAsyncHelper.startMonitor();
 		/*
 		WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
@@ -190,7 +202,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	private void init() {
 		setContentView(R.layout.main);
 		
-		mainInfo = (TextView) findViewById(R.id.mainInfo);
 		artistNameText = (TextView) findViewById(R.id.artistName);
 		albumNameText = (TextView) findViewById(R.id.albumName);
 		songNameText = (TextView) findViewById(R.id.songName);
@@ -361,7 +372,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		// mainInfo.setText(keyCode + "");
 		try {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
@@ -389,21 +399,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	}
 
-	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
-		myLogger.log(Level.INFO, "onCreate");
-		
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
-		if (settings.getString("hostname", "").equals("")) {
-			startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS);
-		}
-		else 
-		{
-			init();
-		}
-
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -456,10 +451,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		if(event.isConnected())
 		{
 		ad.dismiss();
-			String mpdVersion = oMPDAsyncHelper.oMPD.getMpdVersion();
-			StringBuffer stringBuffer = new StringBuffer(100);
-			stringBuffer.append("MPD version " + mpdVersion + " running at " +"" + "\n");
-			mainInfo.setText(stringBuffer.toString());
 			setTitle("PMix");
 			myLogger.log(Level.INFO, "Connection State: " + event.toString());
 		}
@@ -581,6 +572,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	protected void onDestroy() {
 		super.onDestroy();
 		oMPDAsyncHelper.disconnect();
+		oMPDAsyncHelper = null;
 		myLogger.log(Level.INFO, "onDestroy");
 	}
 	
@@ -615,16 +607,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		
 		if(settings.contains("hostname") || settings.contains("port") || settings.contains("password"))
 		{
-			
-			/*
-			Contexte.getInstance().setServerAddress(settings.getString("hostname", ""));
-			try {
-				Contexte.getInstance().setServerPort(Integer.parseInt(settings.getString("port", "6600")));
-			} catch (NumberFormatException e) {
-				Contexte.getInstance().setServerPort(6600);
-			}
-			Contexte.getInstance().setServerPassword(settings.getString("password", ""));
-			*/
+			String sServer = settings.getString("hostname", "");
+			int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
+			String sPassword = settings.getString("password", "");
+			oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
+			oMPDAsyncHelper.disconnect();
+			connectMPD();
 		}
 		
 	}

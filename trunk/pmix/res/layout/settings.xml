@@ -1,25 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"  android:key="preferencescreen"> 
- <PreferenceCategory android:title="Connection settings">  
-         <EditTextPreference  
-             android:key="hostname"  
-             android:title="@string/host"  
-             android:summary="@string/hostDescription"
-             />  
-         <EditTextPreference  
-             android:key="port"
-             android:title="@string/port"
-             android:defaultValue="6600"
-             android:summary="@string/portDescription"
-             />  
-         <EditTextPreference  
-             android:key="password"  
-             android:title="@string/password"
-             android:defaultValue=""
-             android:password="true"
-             android:summary="@string/passwordDescription" /> 
-             />  
-     </PreferenceCategory>  
-     <PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Outputs">  
-     </PreferenceCategory>  
+	<PreferenceCategory android:title="PMix settings"> 
+		<!-- Connection Settings -->
+		<PreferenceScreen android:title="Connection settings" android:summary="Set MPD-Host/Port and password">
+			<PreferenceCategory android:title="Connection settings">  
+				<EditTextPreference  
+			           android:key="hostname"  
+			           android:title="@string/host"  
+			           android:summary="@string/hostDescription"
+			           />  
+			    <EditTextPreference  
+			           android:key="port"
+			           android:title="@string/port"
+			           android:defaultValue="6600"
+			           android:summary="@string/portDescription"
+			           />  
+			    <EditTextPreference
+			           android:key="password"
+			           android:title="@string/password"
+			           android:defaultValue=""
+			           android:password="true"
+			           android:summary="@string/passwordDescription" /> 
+			           />    
+			</PreferenceCategory>
+		</PreferenceScreen>
+		<!-- Outputs -->
+		<PreferenceScreen android:title="Outputs" android:summary="Enable/Disable MPD-Outputs">
+			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Outputs">  
+			</PreferenceCategory>  
+		</PreferenceScreen>
+		<!--  Other settings -->
+		<CheckBoxPreference
+			android:key="random"
+			android:title="Random"
+			android:summary="Enable/Disable random"
+			android:persistent="false"
+		/>
+		<CheckBoxPreference
+			android:key="repeat"
+			android:title="Repeat"
+			android:summary="Enable/Disable repeat"
+			android:persistent="false"
+		/>
+		<!--  Server Information -->
+		<PreferenceScreen android:title="Server Information" android:summary="Different MPD-Server information such as version, songcount...">
+			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Server Information">
+			
+			    <EditTextPreference  
+			           android:key="version"  
+			           android:title="Version"
+			           android:defaultValue=""
+			           android:enabled="false"
+			           android:summary="" /> 
+			           />   
+			  
+			    <EditTextPreference  
+			           android:key="artists"  
+			           android:title="Artists"
+			           android:defaultValue=""
+			           android:enabled="false"
+			           android:summary="" /> 
+			           />   
+			    <EditTextPreference  
+			           android:key="albums"  
+			           android:title="Albums"
+			           android:defaultValue=""
+			           android:enabled="false"
+			           android:summary="" /> 
+			           />   
+			    <EditTextPreference  
+			           android:key="songs"  
+			           android:title="Songs"
+			           android:defaultValue=""
+			           android:enabled="false"
+			           android:summary="" /> 
+			           />   
+			  
+			</PreferenceCategory>  
+		</PreferenceScreen>
+	</PreferenceCategory>
 </PreferenceScreen>
