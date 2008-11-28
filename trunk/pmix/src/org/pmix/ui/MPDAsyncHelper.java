@@ -34,9 +34,10 @@ public class MPDAsyncHelper extends Handler {
 	private static final int EVENT_CONNECT = 0;
 	private static final int EVENT_DISCONNECT = 1;
 	private static final int EVENT_CONNECTFAILED = 2;
-	private static final int EVENT_STARTMONITOR = 3;
-	private static final int EVENT_STOPMONITOR = 4;
-	private static final int EVENT_LOADARTIST = 1;
+	private static final int EVENT_CONNECTSUCCEEDED = 3;
+	private static final int EVENT_STARTMONITOR = 4;
+	private static final int EVENT_STOPMONITOR = 5;
+	private static final int EVENT_LOADARTIST = 6;
 	
 	
 	private static final int EVENT_CONNECTIONSTATE = 11;
@@ -56,6 +57,7 @@ public class MPDAsyncHelper extends Handler {
 
 	public interface ConnectionListener {
 		public void connectionFailed(String message);
+		public void connectionSucceeded(String message);
 	}
 	
     private Collection<ConnectionListener> connectionListners;
@@ -85,6 +87,13 @@ public class MPDAsyncHelper extends Handler {
 		 	case EVENT_CONNECTIONSTATE:
 		 		for(StatusChangeListener listener : statusChangedListeners)
 		 			listener.connectionStateChanged((MPDConnectionStateChangedEvent)msg.obj);
+		 		// Also notify Connection Listener...
+		 		if(((MPDConnectionStateChangedEvent)msg.obj).isConnected())
+		 			for(ConnectionListener listener : connectionListners)
+		 				listener.connectionSucceeded("");
+		 		if(((MPDConnectionStateChangedEvent)msg.obj).isConnectionLost())
+		 			for(ConnectionListener listener : connectionListners)
+		 				listener.connectionFailed("Connection Lost");
 		 		break;
 		 	case EVENT_PLAYLIST:
 		 		for(StatusChangeListener listener : statusChangedListeners)
@@ -124,7 +133,7 @@ public class MPDAsyncHelper extends Handler {
 		 		break;
 		 }
 	 }
-	 
+
 	/**
 	 * Connect to MPD Server
 	 * @param sServer
