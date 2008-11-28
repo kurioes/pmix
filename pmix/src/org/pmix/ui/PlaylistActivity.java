@@ -64,12 +64,19 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		ListView list = getListView();
 		registerForContextMenu(list);
 	}
+	
 	@Override
-	public void onStart()
-	{
+	protected void onStart() {
 		super.onStart();
-		Logger.getAnonymousLogger().log(Level.INFO, "onStart - Playlist");
+		MPDConnectionHandler.getInstance().getLock(this);
 	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDConnectionHandler.getInstance().releaseLock(this);
+	}
+	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;

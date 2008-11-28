@@ -2,6 +2,7 @@ package org.pmix.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
@@ -69,6 +70,18 @@ public class AlbumsActivity extends ListActivity {
 		th.start();
 	}
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MPDConnectionHandler.getInstance().getLock(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDConnectionHandler.getInstance().releaseLock(this);
+	}
+	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;

@@ -52,6 +52,18 @@ public class SongsActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		MPDConnectionHandler.getInstance().getLock(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDConnectionHandler.getInstance().releaseLock(this);
+	}
+
+	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
 		Music music = musics.get(position);
