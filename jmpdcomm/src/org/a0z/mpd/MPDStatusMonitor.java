@@ -69,7 +69,7 @@ public class MPDStatusMonitor extends Thread {
 
         while (!giveup) {
             Boolean connectionState = Boolean.valueOf(mpd.isConnected());
-
+            
             if (connectionLost || oldConnectionState != connectionState) {
                 Iterator it = statusChangedListeners.iterator();
                 while (it.hasNext()) {
@@ -93,7 +93,7 @@ public class MPDStatusMonitor extends Thread {
                     Boolean random = Boolean.valueOf(status.isRandom());
 
                     //playlist
-                    if (oldPlaylistVersion != playlistVersion) {
+                    if (oldPlaylistVersion != playlistVersion && playlistVersion != -1) {
                         Iterator it = statusChangedListeners.iterator();
                         while (it.hasNext()) {
                             ((StatusChangeListener) it.next()).playlistChanged(new MPDPlaylistChangedEvent(status, oldPlaylistVersion));

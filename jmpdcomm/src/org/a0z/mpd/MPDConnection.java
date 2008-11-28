@@ -98,7 +98,9 @@ public class MPDConnection {
                 inputStreamReader = new InputStreamReader(sock.getInputStream());
             }
             BufferedReader in = new BufferedReader(inputStreamReader,1024);
-            for (String line = in.readLine(); line != null && !line.startsWith(MPD_RESPONSE_OK); line = in.readLine()) {
+            boolean anyResponse = false;
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+            	anyResponse = true;
                 if (line.startsWith(MPD_RESPONSE_OK)) {
                     break;
                 }
@@ -107,8 +109,15 @@ public class MPDConnection {
                 }
                 list.add(line);
                 //TODO debug
-                //System.out.println("< " + line);
+                //System.out.println("> " + line);
             }
+            // Close socket if there is no response... Something is wrong (e.g. MPD shutdown..)
+            if(!anyResponse)
+            {
+            	sock.close();
+                throw new MPDConnectionException("Connection lost");
+            }
+            
             return list;
         } catch (SocketException e) {
             this.sock = null;

@@ -100,11 +100,21 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 		
 		
 	}
+
 	@Override
-	public void onResume(){
-		super.onResume();
-		myLogger.log(Level.INFO, "onResume");
+	protected void onStart() {
+		super.onStart();
+		MPDConnectionHandler.getInstance().getLock(this);
+		myLogger.log(Level.INFO, "onStart");
 	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDConnectionHandler.getInstance().releaseLock(this);
+		myLogger.log(Level.INFO, "onStop");
+	}
+	
 	class CheckPreferenceClickListener implements OnPreferenceClickListener {
 
 		@Override
