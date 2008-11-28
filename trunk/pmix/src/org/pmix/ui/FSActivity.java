@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.a0z.mpd.Directory;
 import org.a0z.mpd.MPD;
@@ -67,6 +68,18 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 
 	}
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MPDConnectionHandler.getInstance().getLock(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDConnectionHandler.getInstance().releaseLock(this);
+	}
+	
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
