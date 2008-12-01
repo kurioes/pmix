@@ -547,15 +547,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		long sec = seconds - min * 60;
 		return (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
 	}
-	
-
-
-
-	public ProgressBar getCoverSwitcherProgress() {
-		return coverSwitcherProgress;
-	}
-	
-	
 
     public static void notifyUser(String message, Context context) {
             if (notification != null) {

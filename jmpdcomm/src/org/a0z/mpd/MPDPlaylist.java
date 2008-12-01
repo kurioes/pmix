@@ -89,6 +89,18 @@ public class MPDPlaylist {
         this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_ADD, args);
         this.refresh();
     }
+    
+    /**
+     * Adds a music to playlist recursivly.
+     * @param music music to be added.
+     * @throws MPDServerException if an error occur while contacting server.
+     */
+    public void add(Directory music) throws MPDServerException {
+        String[] args = new String[1];
+        args[0] = music.getFullpath();
+        this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_ADD, args);
+        this.refresh();
+    }
 
     /**
      * Adds a stream to playlist.

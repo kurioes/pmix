@@ -33,8 +33,9 @@ public final class R {
         public static final int forward=0x7f05000a;
         public static final int mainInfo=0x7f050012;
         public static final int next=0x7f05000b;
+        public static final int picture=0x7f050013;
         public static final int playpause=0x7f050009;
-        public static final int preferenceOutput=0x7f050013;
+        public static final int preferenceOutput=0x7f050014;
         public static final int prev=0x7f050007;
         public static final int progress_track=0x7f05000e;
         public static final int progress_volume=0x7f050010;
@@ -50,7 +51,8 @@ public final class R {
         public static final int artists=0x7f030002;
         public static final int files=0x7f030003;
         public static final int main=0x7f030004;
-        public static final int settings=0x7f030005;
+        public static final int playlist_list_item=0x7f030005;
+        public static final int settings=0x7f030006;
     }
     public static final class string {
         public static final int addAlbum=0x7f04000d;
