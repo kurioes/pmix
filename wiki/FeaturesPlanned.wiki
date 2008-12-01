@@ -30,3 +30,4 @@ PMix is still in early development phase... There are several features we would 
   * Support MPD-Output *sag is working this*
   * Avoid creating new objects all the time (saves many cpu cycles => battery lifetime) *sag is working this*
   * Cover caching (check for legal issues)
+  * Check for new versions ([http://code.google.com/android/devel/sign-publish.html#market])
