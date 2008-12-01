@@ -7,14 +7,13 @@ import java.util.List;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
+import org.pmix.ui.MPDAsyncHelper.AsyncExecListener;
 
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
@@ -24,48 +23,46 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-public class ArtistsActivity extends ListActivity {
-	// TODO: Is static really the solution? No, should be cashed in JMPDComm ,but it loads it only once with this "hotfix"...
-	private static List<String> items = null;
-
-	public final static int MAIN = 0;
-	public final static int PLAYLIST = 3;
+public class ArtistsActivity extends BrowseActivity implements AsyncExecListener {
+	// Define this as public, more efficient due to the access of a anonymous inner class...
+	// TODO: Is static really the solution? No, should be cashed in JMPDComm ,but it loads 
+	// it only once with this "hotfix"...
+	public static List<String> items = null;
+	private int iJobID = -1;
+	private ProgressDialog pd;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
 
-		Thread th = new Thread(){
-			ProgressDialog pd;
-			// Thread gets Album data...
-			@Override
-			public void start() {
-				pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Artists...");
-				super.start();
-			}
-			@Override
-			public void run() {
-				try {
-					if(items == null)
-						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listArtists();
-					runOnUiThread(new Runnable(){
-						// Sets Album data to the UI...
-						public void run() {
-							ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
-							setListAdapter(artistsAdapter);
-						}
-					});
-					pd.dismiss();
-				} catch (MPDServerException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		th.start();
+		pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Artists...");
+		
 		ListView list = getListView();
 		registerForContextMenu(list);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		if(items == null)
+		{
+			// Loading Artists asynchronous...
+			MainMenuActivity.oMPDAsyncHelper.addAsyncExecListener(this);
+			iJobID = MainMenuActivity.oMPDAsyncHelper.execAsync(new Runnable(){
+				@SuppressWarnings("unchecked")
+				@Override
+				public void run() 
+				{
+					try {
+						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listArtists();
+					} catch (MPDServerException e) {
+						
+					}
+				}
+			});
+		}
 	}
 
 	@Override
@@ -104,31 +101,15 @@ public class ArtistsActivity extends ListActivity {
     }
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		boolean result = super.onCreateOptionsMenu(menu);
-		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
-		menu.add(0,PLAYLIST, 1, R.string.playlist).setIcon(R.drawable.ic_menu_pmix_playlist);
-		
-		return result;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		Intent i = null;
-		
-		switch (item.getItemId()) {
-
-		case MAIN:
-			i = new Intent(this, MainMenuActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			return true;
-		case PLAYLIST:
-			i = new Intent(this, PlaylistActivity.class);
-			startActivityForResult(i, PLAYLIST);
-			return true;
+	public void asyncExecSucceeded(int jobID) {
+		if(iJobID == jobID)
+		{
+			// Yes, its our job which is done...
+			ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
+			setListAdapter(artistsAdapter);
+			// No need to listen further...
+			MainMenuActivity.oMPDAsyncHelper.removeAsyncExecListener(this);
+			pd.dismiss();
 		}
-		return false;
 	}
 }

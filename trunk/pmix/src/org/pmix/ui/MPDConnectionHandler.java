@@ -124,8 +124,8 @@ public class MPDConnectionHandler implements ConnectionListener, OnSharedPrefere
 
 	@Override
 	public void connectionFailed(String message) {
-			
-		ad.dismiss();
+		if(ad!=null)
+			ad.dismiss();
 		if(actContext.getClass().equals(SettingsActivity.class))
 		{
 
@@ -138,7 +138,6 @@ public class MPDConnectionHandler implements ConnectionListener, OnSharedPrefere
 					// TODO Auto-generated method stub
 					
 				}
-				
 			});
 			test.show();
 		}else

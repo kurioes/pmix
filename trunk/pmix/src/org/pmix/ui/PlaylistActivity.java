@@ -10,6 +10,15 @@ import org.a0z.mpd.MPD;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDServerException;
+import org.a0z.mpd.event.MPDConnectionStateChangedEvent;
+import org.a0z.mpd.event.MPDPlaylistChangedEvent;
+import org.a0z.mpd.event.MPDRandomChangedEvent;
+import org.a0z.mpd.event.MPDRepeatChangedEvent;
+import org.a0z.mpd.event.MPDStateChangedEvent;
+import org.a0z.mpd.event.MPDTrackChangedEvent;
+import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
+import org.a0z.mpd.event.MPDVolumeChangedEvent;
+import org.a0z.mpd.event.StatusChangeListener;
 
 import android.app.Activity;
 import android.app.ListActivity;
@@ -22,10 +31,12 @@ import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-public class PlaylistActivity extends ListActivity implements OnMenuItemClickListener {
+public class PlaylistActivity extends ListActivity implements OnMenuItemClickListener, StatusChangeListener {
 	private ArrayList<HashMap<String,Object>> songlist = new ArrayList<HashMap<String,Object>>();
 	private List<Music> musics;
 	private int arrayListId;
@@ -39,7 +50,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
-		Logger.getAnonymousLogger().log(Level.INFO, "onCreate - Playlist");
+		
 		try {
 			MPDPlaylist playlist = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist();
 			playlist.refresh();
@@ -49,19 +60,30 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 				item.put( "songid", m.getSongId() );
 				item.put( "artist", m.getArtist() );
 				item.put( "title", m.getTitle() );
+				if(m.getSongId() == MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus().getSongId())
+					item.put( "play", android.R.drawable.ic_media_play );
+				else
+					item.put( "play", 0 );
 				songlist.add(item);
 			}
 			SimpleAdapter songs = new SimpleAdapter( 
 					this, 
 					songlist,
-					android.R.layout.simple_list_item_2,
-					new String[] { "title","artist" },
-					new int[] { android.R.id.text1, android.R.id.text2 }  );
+					R.layout.playlist_list_item,
+					new String[] { "play",  "title","artist" },
+					new int[] { R.id.picture ,android.R.id.text1, android.R.id.text2 }  );
+			
 			setListAdapter( songs );
 		} catch (MPDServerException e) {
 		}
-
+		MainMenuActivity.oMPDAsyncHelper.addStatusChangeListener(this);
 		ListView list = getListView();
+		/*
+		LinearLayout test = (LinearLayout)list.getChildAt(1);
+		ImageView img = (ImageView)test.findViewById(R.id.picture);
+		//ImageView img = (ImageView)((LinearLayout)list.getItemAtPosition(3)).findViewById(R.id.picture);
+		img.setImageDrawable(getResources().getDrawable(R.drawable.gmpcnocover));
+		*/
 		registerForContextMenu(list);
 	}
 	
@@ -158,6 +180,63 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	    } catch (MPDServerException e) {
 	    }
 			
+	}
+
+	@Override
+	public void connectionStateChanged(MPDConnectionStateChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void playlistChanged(MPDPlaylistChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void randomChanged(MPDRandomChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void repeatChanged(MPDRepeatChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stateChanged(MPDStateChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void trackChanged(MPDTrackChangedEvent event) {
+		// Mark running track...
+		for(HashMap<String,Object> song : songlist)
+		{
+			if(((Integer)song.get("songid")).intValue()==event.getMpdStatus().getSongId())
+				song.put( "play", android.R.drawable.ic_media_play );
+			else
+				song.put( "play", 0 );
+				
+		
+		}
+		((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
+	}
+
+	@Override
+	public void updateStateChanged(MPDUpdateStateChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void volumeChanged(MPDVolumeChangedEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

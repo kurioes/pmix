@@ -23,23 +23,27 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+
 /**
- * This Class implements the whole MPD Communication as Thread. It also "translates" the Monitor event
- * of the JMPDComm Library back to the GUI-Thread...
+ * This Class implements the whole MPD Communication as a thread. It also "translates" 
+ * the monitor event of the JMPDComm Library back to the GUI-Thread, and allows to  
+ * execute custom commands asynchronously.
  * @author sag
  *
  */
 public class MPDAsyncHelper extends Handler {
 	
+	// Event-ID's for PMix internal events...
 	private static final int EVENT_CONNECT = 0;
 	private static final int EVENT_DISCONNECT = 1;
 	private static final int EVENT_CONNECTFAILED = 2;
 	private static final int EVENT_CONNECTSUCCEEDED = 3;
 	private static final int EVENT_STARTMONITOR = 4;
 	private static final int EVENT_STOPMONITOR = 5;
-	private static final int EVENT_LOADARTIST = 6;
+	private static final int EVENT_EXECASYNC = 6;
+	private static final int EVENT_EXECASYNCFINISHED = 7;
 	
-	
+	// Event-ID's for JMPDComm events (from the listener)...
 	private static final int EVENT_CONNECTIONSTATE = 11;
 	private static final int EVENT_PLAYLIST = 12;
 	private static final int EVENT_RANDOM = 13;
@@ -54,17 +58,26 @@ public class MPDAsyncHelper extends Handler {
 	private MPDAsyncWorker oMPDAsyncWorker;
 	private HandlerThread oMPDAsyncWorkerThread;
 	public MPD oMPD;
-
+	private static int iJobID = 0;
+	
+	// PMix internal ConnectionListener interface 
 	public interface ConnectionListener {
 		public void connectionFailed(String message);
 		public void connectionSucceeded(String message);
 	}
 	
+	// Interface for callback when Asynchronous operations are finished
+	public interface AsyncExecListener {
+		public void asyncExecSucceeded(int jobID);
+	}
+	
+	// Listener Collections
     private Collection<ConnectionListener> connectionListners;
     private Collection<StatusChangeListener> statusChangedListeners;
     private Collection<TrackPositionListener> trackPositionListeners;
+    private Collection<AsyncExecListener> asyncExecListeners;
 	
-
+    // Current connection Information
 	private MPDConnectionInfo conInfo;
     
 	/**
@@ -78,10 +91,16 @@ public class MPDAsyncHelper extends Handler {
 		connectionListners = new LinkedList<ConnectionListener>();
         statusChangedListeners = new LinkedList<StatusChangeListener>();
         trackPositionListeners = new LinkedList<TrackPositionListener>();
+        asyncExecListeners = new LinkedList<AsyncExecListener>();
         conInfo = new MPDConnectionInfo();
 	}
 
-	 public void handleMessage(Message msg) {
+	/**
+	 * This method handels Messages, which comes from the AsyncWorker. This Message handler
+	 * runns in the UI-Thread, and can therfore send the information back to the listeners
+	 * of the matching events... 
+	 */
+	public void handleMessage(Message msg) {
 		 switch (msg.what) 
 		 {
 		 	case EVENT_CONNECTIONSTATE:
@@ -131,11 +150,16 @@ public class MPDAsyncHelper extends Handler {
 		 		for(ConnectionListener listener : connectionListners)
 		 			listener.connectionFailed((String)msg.obj);
 		 		break;
+		 	case EVENT_EXECASYNCFINISHED:
+		 		// Asynchronous operation finished, call the listeners and supply the JobID...
+		 		for(AsyncExecListener listener : asyncExecListeners)
+		 			listener.asyncExecSucceeded(msg.arg1);
+		 		break;
 		 }
 	 }
 
 	/**
-	 * Connect to MPD Server
+	 * Sets the new connection information
 	 * @param sServer
 	 * @param iPort
 	 * @param sPassword
@@ -163,7 +187,22 @@ public class MPDAsyncHelper extends Handler {
 	{
 		oMPDAsyncWorker.obtainMessage(EVENT_DISCONNECT).sendToTarget();
 	}
-
+	
+	/**
+	 * Executes a Runnable Asynchronous. Meant to use for individual long during operations
+	 * on JMPDComm. Use this method only, when the code to execute is only used once in the 
+	 * project. If its use more than once, implement indiviual events and listener in this 
+	 * class. 
+	 * @param run Runnable to execute async
+	 * @return JobID, which is brougth back with the AsyncExecListener interface...
+	 */
+	public int execAsync(Runnable run) {
+		int actjobid = iJobID++;
+		oMPDAsyncWorker.obtainMessage(EVENT_EXECASYNC, actjobid, 0, run).sendToTarget();
+		return actjobid;
+	}
+	
+	
 	public void addStatusChangeListener(StatusChangeListener listener)
 	{
 		statusChangedListeners.add(listener);
@@ -176,7 +215,20 @@ public class MPDAsyncHelper extends Handler {
 	{
 		connectionListners.add(listener);
 	}
+	public void addAsyncExecListener(AsyncExecListener listener)
+	{
+		asyncExecListeners.add(listener);
+	}
+	public void removeAsyncExecListener(AsyncExecListener listener)
+	{
+		asyncExecListeners.remove(listener);
+	}
 	
+	/**
+	 * Asynchronous worker thread-class for long during operations on JMPDComm
+	 * @author sag
+	 *
+	 */
 	public class MPDAsyncWorker extends Handler implements StatusChangeListener, TrackPositionListener {
 		private MPDStatusMonitor monitor;
 		public MPDAsyncWorker(Looper looper)
@@ -213,7 +265,10 @@ public class MPDAsyncHelper extends Handler {
 					} catch (NullPointerException ex) {
 					}
 			 		break;
-			 		
+			 	case EVENT_EXECASYNC:
+			 		Runnable run = (Runnable)msg.obj;
+			 		run.run();
+					MPDAsyncHelper.this.obtainMessage(EVENT_EXECASYNCFINISHED, msg.arg1, 0).sendToTarget();
 				default:
 					break;
 			 }

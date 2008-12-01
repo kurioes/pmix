@@ -11,12 +11,10 @@ import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
@@ -25,10 +23,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-public class FSActivity extends ListActivity implements OnMenuItemClickListener {
+public class FSActivity extends BrowseActivity implements OnMenuItemClickListener {
 	private List<String> items = new ArrayList<String>();
-	public final static int MAIN = 0;
-	public final static int PLAYLIST = 3;
 	private Directory currentDirectory = null;
 	private Directory currentContextDirectory = null;
 
@@ -67,19 +63,6 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 		}
 
 	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		MPDConnectionHandler.getInstance().getLock(this);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		MPDConnectionHandler.getInstance().releaseLock(this);
-	}
-	
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -146,31 +129,9 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 
 	}
 
-	private Collection getAllFiles(Directory dir)
-	{
-		try {
-			dir.refreshData();
-		} catch (MPDServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Collection files = dir.getFiles();
-		Collection dirs = dir.getDirectories();
-		Iterator itr = dirs.iterator();
-		
-		while(itr.hasNext())
-		{
-			Directory actdir = (Directory)itr.next();
-			files.addAll(getAllFiles(actdir));
-			files.addAll(actdir.getFiles());
-		}
-		return files;
-	}
-
 	public boolean onMenuItemClick(MenuItem item) {
 		try {
-			Collection files = getAllFiles(currentContextDirectory);
-			MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(files);
+			MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(currentContextDirectory);
 			MainMenuActivity.notifyUser(getResources().getString(R.string.addedDirectoryToPlaylist), this);
 			//((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 		} catch (MPDServerException e) {
@@ -178,37 +139,5 @@ public class FSActivity extends ListActivity implements OnMenuItemClickListener 
 			e.printStackTrace();
 		}
 		return true;
-	}
-	
-	
-
-
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		boolean result = super.onCreateOptionsMenu(menu);
-		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
-		menu.add(0,PLAYLIST, 1, R.string.playlist).setIcon(R.drawable.ic_menu_pmix_playlist);
-		
-		return result;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		Intent i = null;
-		
-		switch (item.getItemId()) {
-
-		case MAIN:
-			i = new Intent(this, MainMenuActivity.class);
-			startActivity(i);
-			return true;
-		case PLAYLIST:
-			i = new Intent(this, PlaylistActivity.class);
-			startActivityForResult(i, PLAYLIST);
-			return true;
-		}
-		return false;
 	}
 }
