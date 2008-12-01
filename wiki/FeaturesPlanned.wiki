@@ -28,4 +28,5 @@ PMix is still in early development phase... There are several features we would 
   * Menuitem to refresh directory (on MPD) in FSActivity
   * CoverFlow (Maybe, with OpenGL)
   * Support MPD-Output *sag is working this*
-  
+  * Avoid creating new objects all the time (saves many cpu cycles => battery lifetime) *sag is working this*
+  * Cover caching (check for legal issues)
