@@ -84,6 +84,8 @@ public class Music {
             	this.genre = line.substring("Genre: ".length());
             } else if (line.startsWith("Soundtrack:")) {
             	line.substring("Soundtrack: ".length()); //TODO: Soundtrack
+            } else if (line.startsWith("Composer:")) {
+            	line.substring("Composer: ".length()); //TODO: Composer
             } else {
                 (new InvalidResponseException("unknown response: " + line)).printStackTrace();
             }

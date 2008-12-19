@@ -205,4 +205,9 @@ public class MPDStatusMonitor extends Thread {
     public void giveup() {
         this.giveup = true;
     }
+    
+    public boolean isGivingUp()
+    {
+    	return this.giveup;
+    }
 }
