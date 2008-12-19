@@ -28,15 +28,18 @@ import org.pmix.ui.MPDAsyncHelper.ConnectionListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Message;
@@ -128,17 +131,25 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		
+		
+		//WifiManager wifi = (WifiManager)getSystemService(WIFI_SERVICE);
+		
 		myLogger.log(Level.INFO, "onCreate");
 		oMPDAsyncHelper = new MPDAsyncHelper();
 		oMPDAsyncHelper.addStatusChangeListener(this);
 		oMPDAsyncHelper.addTrackPositionListener(this);
 		oMPDAsyncHelper.addConnectionListener(MPDConnectionHandler.getInstance());
-		oMPDAsyncHelper.startMonitor();
+		
+		//registerReceiver(, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION) );
+		registerReceiver(MPDConnectionHandler.getInstance(), new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION) );
+		
+		
 		//oMPDAsyncHelper.addConnectionListener(MPDConnectionHandler.getInstance(this));
 
 		init();
 		
-	}
+	}	
 	
 	@Override
 	protected void onRestart() {
@@ -509,6 +520,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	public void volumeChanged(MPDVolumeChangedEvent event) {
 		progressBarVolume.setProgress(event.getMpdStatus().getVolume());
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		myLogger.log(Level.INFO, "onPause");
 	}
 	
 	@Override
