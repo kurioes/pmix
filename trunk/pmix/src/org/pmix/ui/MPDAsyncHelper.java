@@ -57,6 +57,7 @@ public class MPDAsyncHelper extends Handler {
 	
 	private MPDAsyncWorker oMPDAsyncWorker;
 	private HandlerThread oMPDAsyncWorkerThread;
+	private MPDStatusMonitor oMonitor;
 	public MPD oMPD;
 	private static int iJobID = 0;
 	
@@ -150,6 +151,10 @@ public class MPDAsyncHelper extends Handler {
 		 		for(ConnectionListener listener : connectionListners)
 		 			listener.connectionFailed((String)msg.obj);
 		 		break;
+		 	case EVENT_CONNECTSUCCEEDED:
+		 		for(ConnectionListener listener : connectionListners)
+		 			listener.connectionSucceeded(null);
+		 		break;
 		 	case EVENT_EXECASYNCFINISHED:
 		 		// Asynchronous operation finished, call the listeners and supply the JobID...
 		 		for(AsyncExecListener listener : asyncExecListeners)
@@ -181,6 +186,13 @@ public class MPDAsyncHelper extends Handler {
 	public void stopMonitor()
 	{
 		oMPDAsyncWorker.obtainMessage(EVENT_STOPMONITOR).sendToTarget();
+	}
+	public boolean isMonitorAlive()
+	{
+		if(oMonitor == null)
+			return false;
+		else
+			return oMonitor.isAlive() & !oMonitor.isGivingUp();
 	}
 	
 	public void disconnect()
@@ -230,7 +242,6 @@ public class MPDAsyncHelper extends Handler {
 	 *
 	 */
 	public class MPDAsyncWorker extends Handler implements StatusChangeListener, TrackPositionListener {
-		private MPDStatusMonitor monitor;
 		public MPDAsyncWorker(Looper looper)
 		{
 			super(looper);
@@ -244,19 +255,19 @@ public class MPDAsyncHelper extends Handler {
 				 		oMPD.connect(conInfo.sServer, conInfo.iPort);
 				 		if(!conInfo.sPassword.equals(""))
 				 			oMPD.password(conInfo.sPassword);
-				 			
+				 		MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();	
 					} catch (MPDServerException e) {
 						MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, e.getMessage()).sendToTarget();
 					}
 					break;
 			 	case EVENT_STARTMONITOR:
-					monitor = new MPDStatusMonitor(oMPD, 1000);
-					monitor.addStatusChangeListener(this);
-					monitor.addTrackPositionListener(this);
-					monitor.start();
+			 		oMonitor = new MPDStatusMonitor(oMPD, 1000);
+			 		oMonitor.addStatusChangeListener(this);
+			 		oMonitor.addTrackPositionListener(this);
+			 		oMonitor.start();
 					break;
 			 	case EVENT_STOPMONITOR:
-			 		monitor.giveup();
+			 		oMonitor.giveup();
 			 		break;
 			 	case EVENT_DISCONNECT:
 			 		try {
