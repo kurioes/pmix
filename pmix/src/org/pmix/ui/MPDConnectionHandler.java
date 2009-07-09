@@ -98,19 +98,25 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 		// Get Settings...
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(actContext.getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
 		settings.registerOnSharedPreferenceChangeListener(this);
+
+		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
+		String wifiSSID = app.getCurrentSSID();
 		
-		if (settings.getString("hostname", "").equals("")) {
-			//con.startActivityForResult(new Intent(con, SettingsActivity.class), 1);
-		}
-		else 
-		{
+
+		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
+			String sServer = settings.getString(wifiSSID + "hostname", "");
+			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
+			String sPassword = settings.getString(wifiSSID + "password", "");
+			MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
+		} else if (!settings.getString("hostname", "").equals("")) {
 				String sServer = settings.getString("hostname", "");
 				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
 				String sPassword = settings.getString("password", "");
 				MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
-	
-				connectMPD();
+		} else {
+			return;
 		}
+		connectMPD();
 
 	}
 
@@ -120,6 +126,9 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 		if(ad!=null)
 			ad.dismiss();
 			
+		if(actContext==null)
+			return;
+		
 		ad = new ProgressDialog(actContext);
 		ad.setTitle("Connecting...");
 		ad.setMessage("Connecting to MPD-Server.");
@@ -131,17 +140,23 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 	
 
 	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
+
+		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
+		String wifiSSID = app.getCurrentSSID();
 		
-		if(settings.contains("hostname") || settings.contains("port") || settings.contains("password"))
-		{
-			String sServer = settings.getString("hostname", "");
-			int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
-			String sPassword = settings.getString("password", "");
-			MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
-			MainMenuActivity.oMPDAsyncHelper.disconnect();
-			connectMPD();
+		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
+			String sServer = settings.getString(wifiSSID + "hostname", "");
+			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
+			String sPassword = settings.getString(wifiSSID + "password", "");
+			MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
+		} else if (!settings.getString("hostname", "").equals("")) {
+				String sServer = settings.getString("hostname", "");
+				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
+				String sPassword = settings.getString("password", "");
+				MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
+		} else {
+			return;
 		}
-		
 	}
 
 	@Override
@@ -149,7 +164,7 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 		System.out.println("Connection Failed: "+message);
 		if(ad!=null)
 			ad.dismiss();
-		if(connectionLocks.size()>0)
+		if(connectionLocks.size()>0 && bWifiConnected) 
 		{
 			if(actContext.getClass().equals(SettingsActivity.class))
 			{
@@ -164,7 +179,7 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 						
 					}
 				});
-				test.show();
+				ad = test.show();
 			}
 			else
 			{
@@ -222,12 +237,31 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 			
 			if(networkInfo.isConnected())
 			{
+				bWifiConnected = true;
+				if(ad!=null)
+					ad.dismiss();
 				connect();
 				checkMonitorNeeded();
 			}
 			else
 			{
+				bWifiConnected = false;
 				disconnect();
+				if(ad!=null)
+					ad.dismiss();
+				AlertDialog.Builder test = new AlertDialog.Builder(actContext);
+				test.setMessage("Waiting for WLAN to be connected...");
+				/*
+				test.setPositiveButton("OK", new OnClickListener(){
+	
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				*/
+				ad = test.show();
 			}
 			
 			

@@ -1,81 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"  android:key="preferencescreen"> 
-	<PreferenceCategory android:title="PMix settings"> 
+	<PreferenceCategory android:title="@string/pmixSettings"> 
 		<!-- Connection Settings -->
-		<PreferenceScreen android:title="Connection settings" android:summary="Set MPD-Host/Port and password">
-			<PreferenceCategory android:title="Connection settings">  
-				<EditTextPreference  
-			           android:key="hostname"  
-			           android:title="@string/host"  
-			           android:summary="@string/hostDescription"
-			           />  
-			    <EditTextPreference  
-			           android:key="port"
-			           android:title="@string/port"
-			           android:defaultValue="6600"
-			           android:summary="@string/portDescription"
-			           />  
-			    <EditTextPreference
-			           android:key="password"
-			           android:title="@string/password"
-			           android:defaultValue=""
-			           android:password="true"
-			           android:summary="@string/passwordDescription" /> 
-			           />    
-			</PreferenceCategory>
+		<PreferenceScreen android:title="@string/connectionSettings" 
+						  android:summary="@string/connectionSettingsDescription" 
+						  android:key="connectionScreen">
+						  
+			<intent android:action="android.intent.action.MAIN"
+                    android:targetPackage="org.pmix.ui"
+                    android:targetClass="org.pmix.ui.WifiConnectionSettings" />
+		
 		</PreferenceScreen>
 		<!-- Outputs -->
-		<PreferenceScreen android:title="Outputs" android:summary="Enable/Disable MPD-Outputs">
-			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Outputs">  
+		<PreferenceScreen  android:key="outputsScreen" android:title="@string/outputs" android:summary="@string/outputsDescription">
+			<PreferenceCategory android:key="outputsCategory" android:id="@+id/preferenceOutput" android:title="@string/outputs">  
 			</PreferenceCategory>  
 		</PreferenceScreen>
 		<!--  Other settings -->
 		<CheckBoxPreference
 			android:key="random"
-			android:title="Random"
-			android:summary="Enable/Disable random"
+			android:title="@string/random"
+			android:summary="@string/randomDescription"
 			android:persistent="false"
 		/>
 		<CheckBoxPreference
 			android:key="repeat"
-			android:title="Repeat"
-			android:summary="Enable/Disable repeat"
+			android:title="@string/repeat"
+			android:summary="@string/repeatDescription"
 			android:persistent="false"
 		/>
 		<!--  Server Information -->
-		<PreferenceScreen android:title="Server Information" android:summary="Different MPD-Server information such as version, songcount...">
-			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="Server Information">
-			
+		<PreferenceScreen android:key="informationScreen" android:title="@string/serverInformation" android:summary="@string/serverInformationDescription">
+			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="@string/serverInformation">
 			    <EditTextPreference  
 			           android:key="version"  
-			           android:title="Version"
+			           android:title="@string/version"
 			           android:defaultValue=""
-			           android:enabled="false"
-			           android:summary="" /> 
-			           />   
-			  
+			           android:enabled="false" />   
 			    <EditTextPreference  
 			           android:key="artists"  
-			           android:title="Artists"
+			           android:title="@string/artists"
 			           android:defaultValue=""
-			           android:enabled="false"
-			           android:summary="" /> 
-			           />   
+			           android:enabled="false" />
 			    <EditTextPreference  
 			           android:key="albums"  
-			           android:title="Albums"
+			           android:title="@string/albums"
 			           android:defaultValue=""
-			           android:enabled="false"
-			           android:summary="" /> 
-			           />   
+			           android:enabled="false" />
 			    <EditTextPreference  
 			           android:key="songs"  
-			           android:title="Songs"
+			           android:title="@string/songs"
 			           android:defaultValue=""
-			           android:enabled="false"
-			           android:summary="" /> 
-			           />   
-			  
+			           android:enabled="false" />
 			</PreferenceCategory>  
 		</PreferenceScreen>
 	</PreferenceCategory>

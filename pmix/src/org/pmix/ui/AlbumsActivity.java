@@ -2,7 +2,6 @@ package org.pmix.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
@@ -26,7 +25,6 @@ public class AlbumsActivity extends BrowseActivity implements AsyncExecListener 
 	private int iJobID = -1;
 	private ProgressDialog pd;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
