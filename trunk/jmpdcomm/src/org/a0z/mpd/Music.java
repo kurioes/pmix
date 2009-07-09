@@ -86,8 +86,11 @@ public class Music {
             	line.substring("Soundtrack: ".length()); //TODO: Soundtrack
             } else if (line.startsWith("Composer:")) {
             	line.substring("Composer: ".length()); //TODO: Composer
+            } else if (line.startsWith("Disc:")) {
+            	line.substring("Disc: ".length()); //TODO: Composer
             } else {
-                (new InvalidResponseException("unknown response: " + line)).printStackTrace();
+            	// Ignore this case, there could be some id3 tags which are not common and therefor not implemented here...
+                //(new InvalidResponseException("unknown response: " + line)).printStackTrace();
             }
         }
         this.parent = null;

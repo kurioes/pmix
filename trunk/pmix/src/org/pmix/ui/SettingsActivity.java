@@ -2,8 +2,7 @@ package org.pmix.ui;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 
@@ -20,67 +19,79 @@ import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
 import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 
+import android.app.Application;
+import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class SettingsActivity extends PreferenceActivity implements StatusChangeListener {
-
-	private Logger myLogger = Logger.global;
-	OnPreferenceClickListener onPreferenceClickListener;
-	OnPreferenceClickListener onCheckPreferenceClickListener;
-	HashMap<Integer, CheckBoxPreference> cbPrefs;
-	PreferenceCategory pOutput;
-	CheckBoxPreference pRandom;
-	CheckBoxPreference pRepeat;
+	
+	private static final int MAIN = 0;
+	private static final int ADD = 1;
+	
+	private OnPreferenceClickListener onPreferenceClickListener;
+	private OnPreferenceClickListener onCheckPreferenceClickListener;
+	private HashMap<Integer, CheckBoxPreference> cbPrefs;
+	private CheckBoxPreference pRandom;
+	private CheckBoxPreference pRepeat;
+	
+	private PreferenceScreen pOutputsScreen;
+	private PreferenceScreen pInformationScreen;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.layout.settings);
-		myLogger.log(Level.INFO, "onCreate");
+		Log.i("PMix", "onCreate");
+		
+		
 		onPreferenceClickListener = new OutputPreferenceClickListener();
 		onCheckPreferenceClickListener = new CheckPreferenceClickListener();
 		cbPrefs = new HashMap<Integer, CheckBoxPreference>();
-		pOutput = (PreferenceCategory)findPreference("outputs");
+		pOutputsScreen = (PreferenceScreen)findPreference("outputsScreen");
 		pRandom = (CheckBoxPreference)findPreference("random");
 		pRepeat = (CheckBoxPreference)findPreference("repeat");
+		pInformationScreen = (PreferenceScreen)findPreference("informationScreen");
+
+		// Use the ConnectionPreferConnectionPreferenceCategoryenceCategory for Wi-Fi based Connection setttings
 		
+		/*
+		PreferenceScreen pConnectionScreen = (PreferenceScreen)findPreference("connectionScreen");
+		PreferenceCategory wifiConnection = new ConnectionPreferenceCategory(this);
+		wifiConnection.setTitle("Preferred connection");
+		wifiConnection.setOrder(0);
+		pConnectionScreen.addPreference(wifiConnection);
+		*/
 
 		EditTextPreference pVersion = (EditTextPreference)findPreference("version");
 		EditTextPreference pArtists = (EditTextPreference)findPreference("artists");
 		EditTextPreference pAlbums = (EditTextPreference)findPreference("albums");
 		EditTextPreference pSongs = (EditTextPreference)findPreference("songs");
 		
-		
 		if(!MainMenuActivity.oMPDAsyncHelper.oMPD.isConnected())
 		{
-			pOutput.removeAll();
+			pOutputsScreen.setEnabled(false);
 			pRandom.setEnabled(false);
 			pRepeat.setEnabled(false);
+			pInformationScreen.setEnabled(false);
 			return;
 		}
 		MainMenuActivity.oMPDAsyncHelper.addStatusChangeListener(this);
+
 		try {
 			
-			Collection<MPDOutput> list = MainMenuActivity.oMPDAsyncHelper.oMPD.getOutputs();
 			
-			for(MPDOutput out : list)
-			{
-				CheckBoxPreference pref = new CheckBoxPreference(this);
-				pref.setPersistent(false);
-				pref.setTitle(out.getName());
-				pref.setChecked(out.isEnabled());
-				pref.setKey("" + out.getId());
-				pref.setOnPreferenceClickListener(onPreferenceClickListener);
-				cbPrefs.put(out.getId(), pref);
-				pOutput.addPreference(pref);
-				
-			}
-
 			// Server is Connected...
 			pRandom.setChecked(MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus().isRandom());
 			pRandom.setOnPreferenceClickListener(onCheckPreferenceClickListener);
@@ -91,28 +102,93 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 			pAlbums.setSummary(""+MainMenuActivity.oMPDAsyncHelper.oMPD.getStatistics().getAlbums());
 			pSongs.setSummary(""+MainMenuActivity.oMPDAsyncHelper.oMPD.getStatistics().getSongs());
 			
+				
 		} catch (MPDServerException e) {
-			pOutput.removeAll();
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		}
-		
-		
-		
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		MPDConnectionHandler.getInstance().getLock(this);
-		myLogger.log(Level.INFO, "onStart");
+		Log.i("PMix", "onStart");
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
 		MPDConnectionHandler.getInstance().releaseLock(this);
-		myLogger.log(Level.INFO, "onStop");
+		Log.i("PMix", "onStop");
+	}
+	
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		if(getPreferenceScreen().getKey().equals("connectionscreen"))
+			menu.add(0,ADD, 1, R.string.clear).setIcon(android.R.drawable.ic_menu_add);
+		return result;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		Intent i = null;
+		
+		switch (item.getItemId()) {
+	
+		case MAIN:
+			i = new Intent(this, MainMenuActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Method is beeing called  on any click of an preference...
+	 */
+	
+	public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference)
+	{
+		Log.d("PMix", preferenceScreen.getKey());
+		
+		// Is it the connectionscreen which is called?
+		if(preference.getKey() == null)
+			return false;
+		
+		if(preference.getKey().equals("outputsScreen"))
+		{
+			// Populating outputs...
+			PreferenceCategory pOutput = (PreferenceCategory)findPreference("outputsCategory");
+			try {
+				Collection<MPDOutput> list = MainMenuActivity.oMPDAsyncHelper.oMPD.getOutputs();
+				
+				for(MPDOutput out : list)
+				{
+					CheckBoxPreference pref = new CheckBoxPreference(this);
+					pref.setPersistent(false);
+					pref.setTitle(out.getName());
+					pref.setChecked(out.isEnabled());
+					pref.setKey("" + out.getId());
+					pref.setOnPreferenceClickListener(onPreferenceClickListener);
+					cbPrefs.put(out.getId(), pref);
+					pOutput.addPreference(pref);
+					
+				}
+			} catch (MPDServerException e) {
+				pOutput.removeAll(); // Connection error occured meanwhile...
+			}
+			return true;
+		}
+			
+		
+		return false;
+		
 	}
 	
 	class CheckPreferenceClickListener implements OnPreferenceClickListener {
