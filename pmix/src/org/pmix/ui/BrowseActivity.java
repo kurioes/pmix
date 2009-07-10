@@ -17,13 +17,15 @@ public class BrowseActivity extends ListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MPDConnectionHandler.getInstance().getLock(this);
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.setActivity(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		MPDConnectionHandler.getInstance().releaseLock(this);
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.unsetActivity(this);
 	}
 	
 	@Override

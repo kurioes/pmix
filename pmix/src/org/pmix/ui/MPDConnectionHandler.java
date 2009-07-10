@@ -19,213 +19,20 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
-public class MPDConnectionHandler extends BroadcastReceiver implements ConnectionListener, OnSharedPreferenceChangeListener {
-	
-	private static MPDConnectionHandler oMPDConnectionHandler;
-	private Collection<Context> connectionLocks = new LinkedList<Context>();
-	public Context actContext;
-	private AlertDialog ad;
-	private DialogClickListener oDialogClickListener;
-	
-	private boolean bWifiConnected = false;
-	
-	public static final int SETTINGS = 5;
-	
-	private MPDConnectionHandler()
-	{
-	}
-	
+public class MPDConnectionHandler extends BroadcastReceiver {
+
+	private static MPDConnectionHandler instance;
+
 	public static MPDConnectionHandler getInstance()
 	{
-		if(oMPDConnectionHandler == null)
-		{
-			oMPDConnectionHandler = new MPDConnectionHandler();
-		}
-		return oMPDConnectionHandler; 	
+		if(instance==null)
+			instance=new MPDConnectionHandler();
+		return instance;
 	}
 	
-	public void getLock(Context locker)
-	{
-		actContext = locker;
-		connectionLocks.add(locker);
-		checkMonitorNeeded();
-	}
-	
-	public void releaseLock(Context locker)
-	{
-		connectionLocks.remove(locker);
-		checkMonitorNeeded();
-		if(actContext == locker)
-			actContext=null;
-	}
-	
-	private void checkMonitorNeeded()
-	{
-		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-		if(connectionLocks.size()>0)
-		{
-			if(!app.oMPDAsyncHelper.isMonitorAlive())
-				app.oMPDAsyncHelper.startMonitor();
-		}
-		else
-			app.oMPDAsyncHelper.stopMonitor();
-		
-	}
-	
-	private void checkConnectionNeeded()
-	{
-		if(connectionLocks.size()>0)
-		{
-			MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-			if(!app.oMPDAsyncHelper.oMPD.isConnected() &&
-			   !actContext.getClass().equals(SettingsActivity.class))
-			{
-				connect();
-			}
-				
-		}
-		else
-		{
-			disconnect();
-		}
-		
-	}
-	public void disconnect()
-	{
-		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-		app.oMPDAsyncHelper.disconnect();	
-	}
-	private void connect()
-	{
-		// Get Settings...
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(actContext.getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
-		settings.registerOnSharedPreferenceChangeListener(this);
-
-		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-		String wifiSSID = app.getCurrentSSID();
-		
-
-		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
-			String sServer = settings.getString(wifiSSID + "hostname", "");
-			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
-			String sPassword = settings.getString(wifiSSID + "password", "");
-			app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
-		} else if (!settings.getString("hostname", "").equals("")) {
-				String sServer = settings.getString("hostname", "");
-				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
-				String sPassword = settings.getString("password", "");
-				app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
-		} else {
-			return;
-		}
-		connectMPD();
-
-	}
-
-	private void connectMPD()
-	{
-
-		if(ad!=null)
-			ad.dismiss();
-			
-		if(actContext==null)
-			return;
-		
-		ad = new ProgressDialog(actContext);
-		ad.setTitle("Connecting...");
-		ad.setMessage("Connecting to MPD-Server.");
-		ad.setCancelable(false);
-		ad.show();
-
-		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-		app.oMPDAsyncHelper.doConnect();
-	}
-	
-
-	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
-		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
-		String wifiSSID = app.getCurrentSSID();
-		
-		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
-			String sServer = settings.getString(wifiSSID + "hostname", "");
-			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
-			String sPassword = settings.getString(wifiSSID + "password", "");
-			app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
-		} else if (!settings.getString("hostname", "").equals("")) {
-				String sServer = settings.getString("hostname", "");
-				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
-				String sPassword = settings.getString("password", "");
-				app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
-		} else {
-			return;
-		}
-	}
-
-	@Override
-	public void connectionFailed(String message) {
-		System.out.println("Connection Failed: "+message);
-		if(ad!=null)
-			ad.dismiss();
-		if(connectionLocks.size()>0 && bWifiConnected) 
-		{
-			if(actContext.getClass().equals(SettingsActivity.class))
-			{
-	
-				AlertDialog.Builder test = new AlertDialog.Builder(actContext);
-				test.setMessage("Connection failed, check your connection settings...");
-				test.setPositiveButton("OK", new OnClickListener(){
-	
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				ad = test.show();
-			}
-			else
-			{
-					System.out.println(actContext.getClass());
-					oDialogClickListener = new DialogClickListener();
-					AlertDialog.Builder test = new AlertDialog.Builder(actContext);
-					test.setTitle("Connection Failed");
-					test.setMessage("Connection to MPD-Server failed! Check if the Server is running and reachable.");
-					test.setNegativeButton("Exit", oDialogClickListener);
-					test.setNeutralButton("Settings", oDialogClickListener);
-					test.setPositiveButton("Retry", oDialogClickListener);
-					ad = test.show();
-			}
-		}
-		
-	}
-	
-	@Override
-	public void connectionSucceeded(String message) {
-		ad.dismiss();
-		checkMonitorNeeded();
-	}
-
-	private class DialogClickListener implements OnClickListener {
-
-		public void onClick(DialogInterface dialog, int which) {
-			switch(which) {
-				case AlertDialog.BUTTON3:
-					// Show Settings
-					((Activity)actContext).startActivityForResult(new Intent(actContext, SettingsActivity.class), SETTINGS);
-					break;
-				case AlertDialog.BUTTON2:
-					((Activity)actContext).finish();
-					break;
-				case AlertDialog.BUTTON1:
-					connectMPD();
-					break;
-					
-			}
-		}
-	}
-
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		MPDApplication app = (MPDApplication)context.getApplicationContext();
 		String action = intent.getAction();
 		if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 			System.out.println("WIFI-STATE:"+intent.getAction().toString());
@@ -238,33 +45,9 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 			
 			
 			if(networkInfo.isConnected())
-			{
-				bWifiConnected = true;
-				if(ad!=null)
-					ad.dismiss();
-				connect();
-				checkMonitorNeeded();
-			}
+				app.setWifiConnected(true);
 			else
-			{
-				bWifiConnected = false;
-				disconnect();
-				if(ad!=null)
-					ad.dismiss();
-				AlertDialog.Builder test = new AlertDialog.Builder(actContext);
-				test.setMessage("Waiting for WLAN to be connected...");
-				/*
-				test.setPositiveButton("OK", new OnClickListener(){
-	
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				*/
-				ad = test.show();
-			}
+				app.setWifiConnected(false);
 			
 			
 		}
