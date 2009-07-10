@@ -91,13 +91,11 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MPDConnectionHandler.getInstance().getLock(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		MPDConnectionHandler.getInstance().releaseLock(this);
 	}
 	
 	@Override

@@ -113,10 +113,11 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 			String dir;
 
 			dir = ((Directory) currentDirectory.getDirectories().toArray()[position]).getFullpath();
-
-			intent.putExtra("directory", dir);
-			startActivityForResult(intent, -1);
-
+			if(dir != null)
+			{
+				intent.putExtra("directory", dir);
+				startActivityForResult(intent, -1);
+			}
 		}
 
 	}

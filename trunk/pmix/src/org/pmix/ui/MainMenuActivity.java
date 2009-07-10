@@ -157,7 +157,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MPDConnectionHandler.getInstance().getLock(this);
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.setActivity(this);
 		myLogger.log(Level.INFO, "onStart");
 	}
 	
@@ -535,7 +536,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		MPDConnectionHandler.getInstance().releaseLock(this);
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.unsetActivity(this);
 		myLogger.log(Level.INFO, "onStop");
 	}
 

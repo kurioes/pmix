@@ -35,6 +35,20 @@ public class ConnectionSettings extends PreferenceActivity {
 			
 		}
 	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.setActivity(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.unsetActivity(this);
+	}
 	
 	private void createDynamicSettings(String keyPrefix, PreferenceCategory toCategory)
 	{

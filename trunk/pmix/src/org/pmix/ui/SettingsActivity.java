@@ -52,7 +52,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		MPDApplication app = (MPDApplication)getApplication();
+		MPDApplication app = (MPDApplication)getApplicationContext();
 		addPreferencesFromResource(R.layout.settings);
 		Log.i("PMix", "onCreate");
 		
@@ -113,15 +113,15 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MPDConnectionHandler.getInstance().getLock(this);
-		Log.i("PMix", "onStart");
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.setActivity(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		MPDConnectionHandler.getInstance().releaseLock(this);
-		Log.i("PMix", "onStop");
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.unsetActivity(this);
 	}
 	
 
