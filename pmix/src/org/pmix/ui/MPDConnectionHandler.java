@@ -53,21 +53,22 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 	
 	public void releaseLock(Context locker)
 	{
-		if(actContext == locker)
-			actContext=null;
 		connectionLocks.remove(locker);
 		checkMonitorNeeded();
+		if(actContext == locker)
+			actContext=null;
 	}
 	
 	private void checkMonitorNeeded()
 	{
+		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
 		if(connectionLocks.size()>0)
 		{
-			if(!MainMenuActivity.oMPDAsyncHelper.isMonitorAlive())
-				MainMenuActivity.oMPDAsyncHelper.startMonitor();
+			if(!app.oMPDAsyncHelper.isMonitorAlive())
+				app.oMPDAsyncHelper.startMonitor();
 		}
 		else
-			MainMenuActivity.oMPDAsyncHelper.stopMonitor();
+			app.oMPDAsyncHelper.stopMonitor();
 		
 	}
 	
@@ -75,7 +76,8 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 	{
 		if(connectionLocks.size()>0)
 		{
-			if(!MainMenuActivity.oMPDAsyncHelper.oMPD.isConnected() &&
+			MPDApplication app = (MPDApplication)actContext.getApplicationContext();
+			if(!app.oMPDAsyncHelper.oMPD.isConnected() &&
 			   !actContext.getClass().equals(SettingsActivity.class))
 			{
 				connect();
@@ -90,11 +92,11 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 	}
 	public void disconnect()
 	{
-		MainMenuActivity.oMPDAsyncHelper.disconnect();	
+		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
+		app.oMPDAsyncHelper.disconnect();	
 	}
 	private void connect()
 	{
-
 		// Get Settings...
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(actContext.getApplicationContext());//getSharedPreferences("org.pmix", MODE_PRIVATE);
 		settings.registerOnSharedPreferenceChangeListener(this);
@@ -107,12 +109,12 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 			String sServer = settings.getString(wifiSSID + "hostname", "");
 			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
 			String sPassword = settings.getString(wifiSSID + "password", "");
-			MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
+			app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
 		} else if (!settings.getString("hostname", "").equals("")) {
 				String sServer = settings.getString("hostname", "");
 				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
 				String sPassword = settings.getString("password", "");
-				MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
+				app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
 		} else {
 			return;
 		}
@@ -134,13 +136,13 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 		ad.setMessage("Connecting to MPD-Server.");
 		ad.setCancelable(false);
 		ad.show();
-		
-		MainMenuActivity.oMPDAsyncHelper.doConnect();
+
+		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
+		app.oMPDAsyncHelper.doConnect();
 	}
 	
 
 	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
-
 		MPDApplication app = (MPDApplication)actContext.getApplicationContext();
 		String wifiSSID = app.getCurrentSSID();
 		
@@ -148,12 +150,12 @@ public class MPDConnectionHandler extends BroadcastReceiver implements Connectio
 			String sServer = settings.getString(wifiSSID + "hostname", "");
 			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
 			String sPassword = settings.getString(wifiSSID + "password", "");
-			MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
+			app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);	
 		} else if (!settings.getString("hostname", "").equals("")) {
 				String sServer = settings.getString("hostname", "");
 				int iPort = Integer.getInteger(settings.getString("port", "6600"), 6600);
 				String sPassword = settings.getString("password", "");
-				MainMenuActivity.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
+				app.oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
 		} else {
 			return;
 		}

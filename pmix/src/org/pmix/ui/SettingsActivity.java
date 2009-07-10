@@ -52,6 +52,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		MPDApplication app = (MPDApplication)getApplication();
 		addPreferencesFromResource(R.layout.settings);
 		Log.i("PMix", "onCreate");
 		
@@ -79,7 +80,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 		EditTextPreference pAlbums = (EditTextPreference)findPreference("albums");
 		EditTextPreference pSongs = (EditTextPreference)findPreference("songs");
 		
-		if(!MainMenuActivity.oMPDAsyncHelper.oMPD.isConnected())
+		if(!app.oMPDAsyncHelper.oMPD.isConnected())
 		{
 			pOutputsScreen.setEnabled(false);
 			pRandom.setEnabled(false);
@@ -87,20 +88,20 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 			pInformationScreen.setEnabled(false);
 			return;
 		}
-		MainMenuActivity.oMPDAsyncHelper.addStatusChangeListener(this);
+		app.oMPDAsyncHelper.addStatusChangeListener(this);
 
 		try {
 			
 			
 			// Server is Connected...
-			pRandom.setChecked(MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus().isRandom());
+			pRandom.setChecked(app.oMPDAsyncHelper.oMPD.getStatus().isRandom());
 			pRandom.setOnPreferenceClickListener(onCheckPreferenceClickListener);
-			pRepeat.setChecked(MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus().isRepeat());
+			pRepeat.setChecked(app.oMPDAsyncHelper.oMPD.getStatus().isRepeat());
 			pRepeat.setOnPreferenceClickListener(onCheckPreferenceClickListener);
-			pVersion.setSummary(MainMenuActivity.oMPDAsyncHelper.oMPD.getMpdVersion());
-			pArtists.setSummary(""+MainMenuActivity.oMPDAsyncHelper.oMPD.getStatistics().getArtists());
-			pAlbums.setSummary(""+MainMenuActivity.oMPDAsyncHelper.oMPD.getStatistics().getAlbums());
-			pSongs.setSummary(""+MainMenuActivity.oMPDAsyncHelper.oMPD.getStatistics().getSongs());
+			pVersion.setSummary(app.oMPDAsyncHelper.oMPD.getMpdVersion());
+			pArtists.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getArtists());
+			pAlbums.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getAlbums());
+			pSongs.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getSongs());
 			
 				
 		} catch (MPDServerException e) {
@@ -156,6 +157,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 	public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference)
 	{
 		Log.d("PMix", preferenceScreen.getKey());
+		MPDApplication app = (MPDApplication)getApplication();
 		
 		// Is it the connectionscreen which is called?
 		if(preference.getKey() == null)
@@ -166,7 +168,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 			// Populating outputs...
 			PreferenceCategory pOutput = (PreferenceCategory)findPreference("outputsCategory");
 			try {
-				Collection<MPDOutput> list = MainMenuActivity.oMPDAsyncHelper.oMPD.getOutputs();
+				Collection<MPDOutput> list = app.oMPDAsyncHelper.oMPD.getOutputs();
 				
 				for(MPDOutput out : list)
 				{
@@ -192,11 +194,12 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 	}
 	
 	class CheckPreferenceClickListener implements OnPreferenceClickListener {
+		MPDApplication app = (MPDApplication)getApplication();
 
 		@Override
 		public boolean onPreferenceClick(Preference pref) {
 			CheckBoxPreference prefCB = (CheckBoxPreference)pref;
-			MPD oMPD = MainMenuActivity.oMPDAsyncHelper.oMPD;
+			MPD oMPD = app.oMPDAsyncHelper.oMPD;
 			try {
 				if(prefCB.getKey().equals("random"))
 					oMPD.setRandom(prefCB.isChecked());
@@ -216,7 +219,8 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 		@Override
 		public boolean onPreferenceClick(Preference pref) {
 			CheckBoxPreference prefCB = (CheckBoxPreference)pref;
-			MPD oMPD = MainMenuActivity.oMPDAsyncHelper.oMPD;
+			MPDApplication app = (MPDApplication)getApplication();
+			MPD oMPD = app.oMPDAsyncHelper.oMPD;
 			String id = prefCB.getKey();
 			try {
 				if(prefCB.isChecked())

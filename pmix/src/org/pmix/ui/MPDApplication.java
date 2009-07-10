@@ -8,10 +8,16 @@ public class MPDApplication extends Application {
 
 	private WifiManager mWifiManager;
 	
+	// Change this... (sag)
+	public MPDAsyncHelper oMPDAsyncHelper = null;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
     	System.err.println("onCreate Application");
+    	
+		oMPDAsyncHelper = new MPDAsyncHelper();
+		oMPDAsyncHelper.addConnectionListener(MPDConnectionHandler.getInstance());
 
         mWifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         

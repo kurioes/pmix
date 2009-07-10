@@ -112,8 +112,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	
 	private ButtonEventHandler buttonEventHandler;
 	
-	// Change this... (sag)
-	public static MPDAsyncHelper oMPDAsyncHelper = null;
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -136,10 +134,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		//WifiManager wifi = (WifiManager)getSystemService(WIFI_SERVICE);
 		
 		myLogger.log(Level.INFO, "onCreate");
-		oMPDAsyncHelper = new MPDAsyncHelper();
-		oMPDAsyncHelper.addStatusChangeListener(this);
-		oMPDAsyncHelper.addTrackPositionListener(this);
-		oMPDAsyncHelper.addConnectionListener(MPDConnectionHandler.getInstance());
+		MPDApplication app = (MPDApplication)getApplication();
+		app.oMPDAsyncHelper.addStatusChangeListener(this);
+		app.oMPDAsyncHelper.addTrackPositionListener(this);
 		
 		//registerReceiver(, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION) );
 		registerReceiver(MPDConnectionHandler.getInstance(), new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION) );
@@ -237,7 +234,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				if(fromTouch)
 				{
 					try {
-						oMPDAsyncHelper.oMPD.setVolume(progress);
+						MPDApplication app = (MPDApplication)getApplication();
+						app.oMPDAsyncHelper.oMPD.setVolume(progress);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -262,7 +260,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				if(fromTouch)
 				{
 					try {
-						oMPDAsyncHelper.oMPD.seek((int)progress);
+						MPDApplication app = (MPDApplication)getApplication();
+						app.oMPDAsyncHelper.oMPD.seek((int)progress);
 					} catch (MPDServerException e) {
 						e.printStackTrace();
 					}
@@ -287,7 +286,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	private class ButtonEventHandler implements Button.OnClickListener, Button.OnLongClickListener {
 
 		public void onClick(View v) {
-			MPD mpd = oMPDAsyncHelper.oMPD;
+			MPDApplication app = (MPDApplication)getApplication();
+			MPD mpd = app.oMPDAsyncHelper.oMPD;
 			try {
 				switch(v.getId()) {
 					case R.id.next:
@@ -324,7 +324,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		}
 
 		public boolean onLongClick(View v) {
-			MPD mpd = oMPDAsyncHelper.oMPD;
+			MPDApplication app = (MPDApplication)getApplication();
+			MPD mpd = app.oMPDAsyncHelper.oMPD;
 			try {
 				switch(v.getId()) {
 					case R.id.playpause:
@@ -349,24 +350,25 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		MPDApplication app = (MPDApplication)getApplication();
 		try {
 			switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
 				progressBarVolume.incrementProgressBy(VOLUME_STEP);
-				oMPDAsyncHelper.oMPD.adjustVolume(VOLUME_STEP);
+				app.oMPDAsyncHelper.oMPD.adjustVolume(VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
 				progressBarVolume.incrementProgressBy(-VOLUME_STEP);
-				oMPDAsyncHelper.oMPD.adjustVolume(-VOLUME_STEP);
+				app.oMPDAsyncHelper.oMPD.adjustVolume(-VOLUME_STEP);
 				return true;
 			case KeyEvent.KEYCODE_DPAD_LEFT:
-				oMPDAsyncHelper.oMPD.previous();
+				app.oMPDAsyncHelper.oMPD.previous();
 				return true;
 			case KeyEvent.KEYCODE_DPAD_RIGHT:
-				oMPDAsyncHelper.oMPD.next();
+				app.oMPDAsyncHelper.oMPD.next();
 				return true;
 			default:
-				return false;
+				return super.onKeyDown(keyCode, event);
 			}
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
@@ -427,7 +429,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 	//private MPDPlaylist playlist;
 	public void playlistChanged(MPDPlaylistChangedEvent event) {
 		try {
-			oMPDAsyncHelper.oMPD.getPlaylist().refresh();
+			MPDApplication app = (MPDApplication)getApplication();
+			app.oMPDAsyncHelper.oMPD.getPlaylist().refresh();
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -475,8 +478,9 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 				int songId = status.getSongPos();
 				if(songId>=0)
 				{
-					
-					Music actSong = oMPDAsyncHelper.oMPD.getPlaylist().getMusic(songId);
+
+					MPDApplication app = (MPDApplication)getApplication();
+					Music actSong = app.oMPDAsyncHelper.oMPD.getPlaylist().getMusic(songId);
 					String artist = actSong.getArtist();
 					String title = actSong.getTitle();
 					String album = actSong.getAlbum();

@@ -25,9 +25,10 @@ public class SongsActivity extends BrowseActivity {
 		List<String> items = new ArrayList<String>();
 
 		try {
+			MPDApplication app = (MPDApplication)getApplication();
 			String album = (String) this.getIntent().getStringExtra("album");
 			this.setTitle(album);
-			musics = new ArrayList<Music>(MainMenuActivity.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
+			musics = new ArrayList<Music>(app.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
 
 			for (Music music : musics) {
 				items.add(music.getTitle());
@@ -49,6 +50,7 @@ public class SongsActivity extends BrowseActivity {
 
 		Music music = musics.get(position);
 		try {
+			MPDApplication app = (MPDApplication)getApplication();
 
 			int songId = -1;
 			// try to find it in the current playlist first
@@ -58,13 +60,13 @@ public class SongsActivity extends BrowseActivity {
 			// not found
 			//if (founds.isEmpty()) {
 				//songId = 
-				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
+				app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
 			//} else {
 				// found
 			//	songId = founds.toArray(new Music[founds.size()])[0].getSongId();
 			//}
 			if (songId > -1) {
-				MainMenuActivity.oMPDAsyncHelper.oMPD.skipTo(songId);
+				app.oMPDAsyncHelper.oMPD.skipTo(songId);
 			}
 			
 		} catch (MPDServerException e) {
