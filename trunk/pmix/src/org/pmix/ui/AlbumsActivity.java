@@ -43,19 +43,21 @@ public class AlbumsActivity extends BrowseActivity implements AsyncExecListener 
 	@Override
 	protected void onStart() {
 		super.onStart();
+		MPDApplication app = (MPDApplication)getApplication();
 		
 		// Loading Albums asynchronous...
-		MainMenuActivity.oMPDAsyncHelper.addAsyncExecListener(this);
-		iJobID = MainMenuActivity.oMPDAsyncHelper.execAsync(new Runnable(){
+		app.oMPDAsyncHelper.addAsyncExecListener(this);
+		iJobID = app.oMPDAsyncHelper.execAsync(new Runnable(){
 			@SuppressWarnings("unchecked")
 			@Override
 			public void run() 
 			{
 				try {
+					MPDApplication app = (MPDApplication)getApplication();
 					if (getIntent().getStringExtra("artist") != null) {
-						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listAlbums((String) getIntent().getStringExtra("artist"));
+						items = (List)app.oMPDAsyncHelper.oMPD.listAlbums((String) getIntent().getStringExtra("artist"));
 					} else {
-						items = (List)MainMenuActivity.oMPDAsyncHelper.oMPD.listAlbums();
+						items = (List)app.oMPDAsyncHelper.oMPD.listAlbums();
 					}
 				} catch (MPDServerException e) {
 					
@@ -76,8 +78,9 @@ public class AlbumsActivity extends BrowseActivity implements AsyncExecListener 
 			private String album;
 			public boolean onMenuItemClick(MenuItem item) {
 				try {
-					ArrayList<Music> songs = new ArrayList<Music>(MainMenuActivity.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
-					MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
+					MPDApplication app = (MPDApplication)getApplication();
+					ArrayList<Music> songs = new ArrayList<Music>(app.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ALBUM, album));
+					app.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
 					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.albumAdded),album), AlbumsActivity.this);
 				} catch (MPDServerException e) {
 					// TODO Auto-generated catch block
@@ -108,7 +111,8 @@ public class AlbumsActivity extends BrowseActivity implements AsyncExecListener 
 			ArrayAdapter<String> notes = new ArrayAdapter<String>(AlbumsActivity.this, android.R.layout.simple_list_item_1, items);
 			setListAdapter(notes);
 			// No need to listen further...
-			MainMenuActivity.oMPDAsyncHelper.removeAsyncExecListener(this);
+			MPDApplication app = (MPDApplication)getApplication();
+			app.oMPDAsyncHelper.removeAsyncExecListener(this);
 			pd.dismiss();
 		}
 	}

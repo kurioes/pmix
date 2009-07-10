@@ -49,10 +49,11 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		MPDApplication app = (MPDApplication)getApplication();
 		setContentView(R.layout.artists);
 		
 		try {
-			MPDPlaylist playlist = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist();
+			MPDPlaylist playlist = app.oMPDAsyncHelper.oMPD.getPlaylist();
 			playlist.refresh();
 			musics = playlist.getMusics();
 			for(Music m : musics) {
@@ -60,7 +61,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 				item.put( "songid", m.getSongId() );
 				item.put( "artist", m.getArtist() );
 				item.put( "title", m.getTitle() );
-				if(m.getSongId() == MainMenuActivity.oMPDAsyncHelper.oMPD.getStatus().getSongId())
+				if(m.getSongId() == app.oMPDAsyncHelper.oMPD.getStatus().getSongId())
 					item.put( "play", android.R.drawable.ic_media_play );
 				else
 					item.put( "play", 0 );
@@ -76,7 +77,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 			setListAdapter( songs );
 		} catch (MPDServerException e) {
 		}
-		MainMenuActivity.oMPDAsyncHelper.addStatusChangeListener(this);
+		app.oMPDAsyncHelper.addStatusChangeListener(this);
 		ListView list = getListView();
 		/*
 		LinearLayout test = (LinearLayout)list.getChildAt(1);
@@ -113,12 +114,13 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 
 
 	public boolean onMenuItemClick(MenuItem item) {
+		MPDApplication app = (MPDApplication)getApplication();
 		switch (item.getItemId()) {
 		case 0:
 			try {
-				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().removeSong(songId);
+				app.oMPDAsyncHelper.oMPD.getPlaylist().removeSong(songId);
 				songlist.remove(arrayListId); 
-				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().refresh(); // If not refreshed an intern Array of JMPDComm get out of sync and throws IndexOutOfBound
+				app.oMPDAsyncHelper.oMPD.getPlaylist().refresh(); // If not refreshed an intern Array of JMPDComm get out of sync and throws IndexOutOfBound
 				MainMenuActivity.notifyUser(getResources().getString(R.string.deletedSongFromPlaylist), this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
 			} catch (MPDServerException e) {
@@ -145,6 +147,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		MPDApplication app = (MPDApplication)getApplication();
 		// Menu actions...
 		switch (item.getItemId()) {
 		case MAIN:
@@ -154,7 +157,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 			return true;
 		case CLEAR:
 			try {
-				MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().clear();
+				app.oMPDAsyncHelper.oMPD.getPlaylist().clear();
 				songlist.clear();
 				MainMenuActivity.notifyUser(getResources().getString(R.string.playlistCleared), this);
 				((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
@@ -173,10 +176,11 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		MPDApplication app = (MPDApplication)getApplication();
 		// Play selected Song
 		Music m = musics.get(position);
 	    try {
-	    	MainMenuActivity.oMPDAsyncHelper.oMPD.skipTo(m.getSongId());
+	    	app.oMPDAsyncHelper.oMPD.skipTo(m.getSongId());
 	    } catch (MPDServerException e) {
 	    }
 			
