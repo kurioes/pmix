@@ -17,6 +17,7 @@ PMix is still in early development phase... There are several features we would 
   * Add more than one MPD-Server (WiFi based) *done by sag*
   * Connect only when WLAN is on *done by sag*
   * Option for Random/Repeat mode *done by sag*
+  * Wait dialog when browsing artists/albums etc. *done by sag*
 
 = Planned features for 0.5 =
   * Update API to 1.5
