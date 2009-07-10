@@ -13,6 +13,7 @@ PMix is still in early development phase... There are several features we would 
   * Choose MPD-Outputs *done by sag*
 
 = Planned features for 0.4 =
+  * Update to Android API 1.1 *done by sag*
   * Centralize connection management *done by sag*
   * Add more than one MPD-Server (WiFi based) *done by sag*
   * Connect only when WLAN is on *done by sag*
