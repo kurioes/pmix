@@ -469,7 +469,9 @@ public class MPD {
         Iterator it = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args).iterator();
         Collection result = new LinkedList();
         while (it.hasNext()) {
-            result.add(((String) it.next()).split(": ")[1]);
+        	String[] arr = ((String) it.next()).split(": ");
+        	if(arr.length > 1)
+        		result.add(arr[1]);
         }
         return result;
     }
@@ -507,7 +509,10 @@ public class MPD {
         Iterator it = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args).iterator();
         Collection result = new LinkedList();
         while (it.hasNext()) {
-            result.add(((String) it.next()).split(": ")[1]);
+        	String s = (String) it.next();
+			String[] ss = s.split(": ");
+			if (ss.length > 1)
+				result.add(ss[1]);
         }
         return result;
     }

@@ -153,7 +153,7 @@ public class MPDApplication extends Application implements ConnectionListener, O
 			{
 	
 				AlertDialog.Builder test = new AlertDialog.Builder(currentActivity);
-				test.setMessage("Connection failed, check your connection settings...");
+				test.setMessage("Connection failed, check your connection settings. (" + message + ")");
 				test.setPositiveButton("OK", new OnClickListener(){
 	
 					@Override
@@ -170,7 +170,7 @@ public class MPDApplication extends Application implements ConnectionListener, O
 					oDialogClickListener = new DialogClickListener();
 					AlertDialog.Builder test = new AlertDialog.Builder(currentActivity);
 					test.setTitle("Connection Failed");
-					test.setMessage("Connection to MPD-Server failed! Check if the Server is running and reachable.");
+					test.setMessage("Connection to MPD-Server failed! Check if the Server is running and reachable. (" + message + ")");
 					test.setNegativeButton("Exit", oDialogClickListener);
 					test.setNeutralButton("Settings", oDialogClickListener);
 					test.setPositiveButton("Retry", oDialogClickListener);

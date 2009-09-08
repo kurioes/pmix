@@ -46,6 +46,10 @@ public class MPDStatus {
 
     private boolean random;
 
+    private boolean single;
+
+    private boolean consume;
+
     private String state;
 
     private String error;
@@ -63,6 +67,10 @@ public class MPDStatus {
     private int channels;
 
     private boolean updating;
+
+    private int nextSong;
+
+    private int nextSongId;
 
     private MPDStatus() {
     }
@@ -148,6 +156,22 @@ public class MPDStatus {
             } else if (line.startsWith("updating_db:")) {
                 System.out.println(line);
                 this.updating = true;
+            } else if (line.startsWith("nextsong:")) {
+                this.nextSong = Integer.parseInt(line.substring("nextsong: ".length()));
+            } else if (line.startsWith("nextsongid:")) {
+                this.nextSongId = Integer.parseInt(line.substring("nextsongid: ".length()));
+            } else if (line.startsWith("consume:")) {
+                if ("1".equals(line.substring("consume: ".length()))) {
+                    this.consume = true;
+                } else {
+                    this.consume = false;
+                }
+             } else if (line.startsWith("single:")) {
+                if ("1".equals(line.substring("single: ".length()))) {
+                    this.single = true;
+                } else {
+                    this.single = false;
+                }
             } else {
                 (new InvalidResponseException("unknown response: " + line)).printStackTrace();
             }
