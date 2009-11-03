@@ -8,20 +8,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Felipe Gustavo de Almeida
+ * @author Felipe Gustavo de Almeida, Stefan Agner
+ * 
  */
 public class MusicList {
 
-    private Map map;
+    private HashMap<Integer, Music> map;
 
-    private ArrayList list;
+    private ArrayList<Music> list;
 
     /**
      * Constructor.
      */
     public MusicList() {
-        map = new HashMap();
-        list = new ArrayList();
+        map = new HashMap<Integer, Music>();
+        list = new ArrayList<Music>();
     }
 
     /**
@@ -37,7 +38,7 @@ public class MusicList {
      * Retrieves a List containing all musics from this <code>MusicList</code>.
      * @return Retrieves a List containing all musics from this <code>MusicList</code>.
      */
-    public List getMusics() {
+    public List<Music> getMusics() {
         return list;
     }
 
@@ -68,7 +69,7 @@ public class MusicList {
      * @return a Music with given songId or <code>null</code> if it is not present on this <code>MusicList</code>.
      */
     public Music getById(int songId) {
-        return (Music) map.get(new Integer(songId));
+        return map.get(new Integer(songId));
     }
 
     /**
@@ -77,7 +78,7 @@ public class MusicList {
      * @return a Music with given position or <code>null</code> if it is not present on this <code>MusicList</code>.
      */
     public Music getByIndex(int index) {
-        return (Music) list.get(index);
+        return list.get(index);
     }
 
     /**
@@ -85,11 +86,8 @@ public class MusicList {
      * @param playlist <code>Collection</code> of <code>Music</code> to be added to this <code>MusicList</code>.
      * @throws ClassCastException when <code>playlist</code> contains elements not asignable to <code>Music</code>.
      */
-    public void addAll(Collection playlist) throws ClassCastException {
-        Iterator it = playlist.iterator();
-        while (it.hasNext()) {
-            this.add((Music) it.next());
-        }
+    public void addAll(List<Music> playlist) throws ClassCastException {
+    	list.addAll(playlist);
     }
 
     /**
@@ -140,11 +138,7 @@ public class MusicList {
      * @return a <code>List</code> with selected slice from this <code>MusicList</code>.
      * @see List#subList(int, int)
      */
-    public List subList(int fromIndex, int toIndex) {
+    public List<Music> subList(int fromIndex, int toIndex) {
         return this.list.subList(fromIndex, toIndex);
-    }
-
-    private void grownList(int size) {
-
     }
 }

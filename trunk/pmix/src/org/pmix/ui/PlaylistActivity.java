@@ -87,15 +87,19 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		*/
 		registerForContextMenu(list);
 	}
-	
+
 	@Override
 	protected void onStart() {
 		super.onStart();
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.setActivity(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		MPDApplication app = (MPDApplication)getApplicationContext();
+		app.unsetActivity(this);
 	}
 	
 	@Override

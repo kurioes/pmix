@@ -74,17 +74,17 @@ public class MPDConnection {
         }
     }
 
-    List sendCommand(String command, String[] args) throws MPDServerException {
+    List<String> sendCommand(String command, String[] args) throws MPDServerException {
         return sendRawCommand(commandToString(command, args));
     }
 
-    private synchronized List sendRawCommand(String command) throws MPDServerException {
+    private synchronized List<String> sendRawCommand(String command) throws MPDServerException {
         if (sock == null || !sock.isConnected()) {
             throw new MPDServerException("No connection to server");
         }
 
         try {
-            ArrayList list = new ArrayList();
+            ArrayList<String> list = new ArrayList<String>();
             //TODO debug
             //System.out.print("> " + command);
             InputStreamReader inputStreamReader;
@@ -127,7 +127,7 @@ public class MPDConnection {
         }
     }
 
-    List sendCommand(String command) throws MPDServerException {
+    List<String> sendCommand(String command) throws MPDServerException {
         return sendCommand(command, null);
     }
 
