@@ -42,4 +42,6 @@
 	<string name="outputsDescription">Enable/Disable MPD-Outputs</string>
 	<string name="pmixSettings">PMix settings</string>
 	
+<string name="about">About</string>
+<string name="aboutDescription">About PMix</string>
 </resources>

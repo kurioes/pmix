@@ -24,6 +24,7 @@
         <activity android:name=".FSActivity" android:label="@string/files"/>
         <activity android:name=".AlbumsActivity" android:label="@string/albums"/>
         <activity android:name=".SongsActivity" android:label="@string/artists"/>
+        <activity android:name=".AboutActivity" android:label="@string/about"/>
     </application>
 	<uses-sdk android:minSdkVersion="2" />
 </manifest> 

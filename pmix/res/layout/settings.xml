@@ -54,5 +54,15 @@
 			           android:enabled="false" />
 			</PreferenceCategory>  
 		</PreferenceScreen>
+		<!-- About -->
+		<PreferenceScreen android:title="@string/about" 
+						  android:summary="@string/aboutDescription" 
+						  android:key="aboutScreen">
+						  
+			<intent android:action="android.intent.action.MAIN"
+                    android:targetPackage="org.pmix.ui"
+                    android:targetClass="org.pmix.ui.AboutActivity" />
+		
+		</PreferenceScreen>
 	</PreferenceCategory>
 </PreferenceScreen>

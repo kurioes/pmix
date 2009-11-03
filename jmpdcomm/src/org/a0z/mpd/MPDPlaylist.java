@@ -11,7 +11,7 @@ import org.a0z.mpd.url.UnsupportedMimeTypeException;
 
 /**
  * MPD Playlist controller.
- * @author Felipe Gustavo de Almeida
+ * @author Felipe Gustavo de Almeida, Stefan Agner
  * @version $Id: MPDPlaylist.java 2716 2004-11-20 17:37:20Z galmeida $
  */
 public class MPDPlaylist {
@@ -216,16 +216,13 @@ public class MPDPlaylist {
      * @return current playlist version.
      */
     private int reload() throws MPDServerException {
-        Collection playlist = new LinkedList();
-        List file = new LinkedList();
+    	LinkedList<Music> playlist = new LinkedList<Music>();
+    	LinkedList<String> file = new LinkedList<String>();
         //TODO should be atomic
         MPDStatus status = this.mpd.getStatus();
-        List response = this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_LIST);
-        Iterator it = response.iterator();
+        List<String> response = this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_LIST);
         int index = 0;
-        while (it.hasNext()) {
-            String line = (String) it.next();
-
+        for (String line : response) {
             if (line.startsWith("file: ")) {
                 if (file.size() != 0) {
                     playlist.add(new Music(file));
@@ -421,7 +418,7 @@ public class MPDPlaylist {
      * @return all songs as an <code>List</code> of <code>Music</code>.
      * @see Music
      */
-    public List getMusics() {
+    public List<Music> getMusics() {
         return this.list.getMusics();
     }
 
@@ -432,9 +429,8 @@ public class MPDPlaylist {
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        Iterator it = list.getMusics().iterator();
-        while (it.hasNext()) {
-            sb.append(it.next() + "\n");
+        for (Music m : list.getMusics()) {
+            sb.append(m.toString() + "\n");
         }
         return sb.toString();
     }

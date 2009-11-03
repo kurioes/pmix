@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import org.pmix.cover.CoverRetriever;
+import org.pmix.cover.LastFMCover;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -87,7 +88,7 @@ public class CoverAsyncHelper extends Handler {
 					String url = null;
 					try {
 						// Get URL to the Cover...
-						url = CoverRetriever.getCoverUrl(info.sArtist, info.sAlbum);
+						url = LastFMCover.getCoverUrl(info.sArtist, info.sAlbum);
 					} catch (Exception e1) {
 						CoverAsyncHelper.this.obtainMessage(EVENT_COVERNOTFOUND).sendToTarget();
 					}
@@ -115,7 +116,7 @@ public class CoverAsyncHelper extends Handler {
 						CoverAsyncHelper.this.obtainMessage(EVENT_COVERNOTFOUND).sendToTarget();
 					}
 			 		break;
-			 	default:		
+			 	default:
 			 }
 		 }
 	}

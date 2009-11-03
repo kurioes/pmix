@@ -3,6 +3,7 @@ package org.a0z.mpd;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -457,7 +458,7 @@ public class MPD {
      * @return <code>Collection</code> with all album names from the given artist present in database.
      * @throws MPDServerException if an error occur while contacting server.
      */
-    public Collection listAlbums(String artist) throws MPDServerException {
+    public LinkedList<String> listAlbums(String artist) throws MPDServerException {
         String[] args = null;
         if (artist == null) {
             args = new String[1];
@@ -466,13 +467,14 @@ public class MPD {
             args[1] = artist;
         }
         args[0] = MPD_TAG_ALBUM;
-        Iterator it = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args).iterator();
-        Collection result = new LinkedList();
-        while (it.hasNext()) {
-        	String[] arr = ((String) it.next()).split(": ");
+        List<String> list = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args);
+        LinkedList<String> result = new LinkedList<String>();
+        for (String line : list) {
+        	String[] arr = line.split(": ");
         	if(arr.length > 1)
         		result.add(arr[1]);
         }
+        Collections.sort(result);
         return result;
     }
 
@@ -485,10 +487,8 @@ public class MPD {
     public Directory listAllFiles(String dir) throws MPDServerException {
         String[] args = new String[1];
         args[0] = dir;
-        Iterator it = mpdConnection.sendCommand(MPD_CMD_LISTALL, args).iterator();
-
-        while (it.hasNext()) {
-            String line = (String) it.next();
+        List<String> list = mpdConnection.sendCommand(MPD_CMD_LISTALL, args);
+        for (String line : list) {
             if (line.startsWith("directory: ")) {
                 rootDirectory.makeDirectory(line.substring("directory: ".length()));
             } else if (line.startsWith("file: ")) {
@@ -503,17 +503,17 @@ public class MPD {
      * @return artist names from database.
      * @throws MPDServerException if an error occur while contacting server.
      */
-    public Collection listArtists() throws MPDServerException {
+    public LinkedList<String> listArtists() throws MPDServerException {
         String[] args = new String[1];
         args[0] = MPD_TAG_ARTIST;
-        Iterator it = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args).iterator();
-        Collection result = new LinkedList();
-        while (it.hasNext()) {
-        	String s = (String) it.next();
+        List<String> list = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args);
+        LinkedList<String> result = new LinkedList<String>();
+        for (String s : list) {
 			String[] ss = s.split(": ");
 			if (ss.length > 1)
 				result.add(ss[1]);
         }
+        Collections.sort(result);
         return result;
     }
 

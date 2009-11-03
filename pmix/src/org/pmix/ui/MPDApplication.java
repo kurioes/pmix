@@ -37,13 +37,14 @@ public class MPDApplication extends Application implements ConnectionListener, O
 		currentActivity = activity;
 		connectionLocks.add(activity);
 		checkMonitorNeeded();
-		
+		checkConnectionNeeded();
 	}
 	
 	public void unsetActivity(Activity activity)
 	{
 		connectionLocks.remove(activity);
 		checkMonitorNeeded();
+		checkConnectionNeeded();
 		if(currentActivity == activity)
 			currentActivity=null;
 	}
