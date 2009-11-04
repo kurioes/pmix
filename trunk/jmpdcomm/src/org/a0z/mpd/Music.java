@@ -37,9 +37,9 @@ public class Music {
 
     private String title;
 
-    private int totalTracks;
+    private String totalTracks;
 
-    private int track;
+    private String track;
 
     private Directory parent;
 
@@ -68,9 +68,9 @@ public class Music {
                 this.name = line.substring("Name: ".length());
             } else if (line.startsWith("Track:")) {
                 String[] aux = line.substring("Track: ".length()).split("/");
-                this.track = Integer.parseInt(aux[0]);
+                this.track = aux[0];
                 if (aux.length > 1) {
-                    this.totalTracks = Integer.parseInt(aux[1]);
+                    this.totalTracks = aux[1];
                 }
             } else if (line.startsWith("Time:")) {
                 this.time = Long.parseLong(line.substring("Time: ".length()));
@@ -201,18 +201,18 @@ public class Music {
     }
 
     /**
-     * Retrives total number of tracks from this music's album when available.
+     * Retrives total number of tracks from this music's album when available. This can contain letters!
      * @return total number of tracks from this music's album when available.
      */
-    public int getTotalTracks() {
+    public String getTotalTracks() {
         return totalTracks;
     }
 
     /**
-     * Retrieves track number.
+     * Retrieves track number. This can contain letters!
      * @return track number.
      */
-    public int getTrack() {
+    public String getTrack() {
         return track;
     }
 
@@ -275,16 +275,16 @@ public class Music {
      * Defines total number of tracks from this music's album when available.
      * @param i total number of tracks from this music's album when available.
      */
-    public void setTotalTracks(int i) {
-        totalTracks = i;
+    public void setTotalTracks(String str) {
+        totalTracks = str;
     }
 
     /**
      * Defines track number.
      * @param i track number.
      */
-    public void setTrack(int i) {
-        track = i;
+    public void setTrack(String str) {
+        track = str;
     }
 
     /**

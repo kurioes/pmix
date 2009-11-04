@@ -30,21 +30,21 @@ public class MPDStatus {
      */
     public static final String MPD_STATE_UNKNOWN = "unknown";
 
-    private int volume;
+    protected int volume;
 
     private long bitrate;
 
     private int playlistVersion;
 
-    private int playlistLength;
+    protected int playlistLength;
 
-    private int song;
+    protected int song;
 
-    private int songId;
+    protected int songId;
 
-    private boolean repeat;
+    protected boolean repeat;
 
-    private boolean random;
+    protected boolean random;
 
     private boolean single;
 
@@ -54,7 +54,7 @@ public class MPDStatus {
 
     private String error;
 
-    private long elapsedTime;
+    protected long elapsedTime;
 
     private long totalTime;
 
@@ -72,16 +72,13 @@ public class MPDStatus {
 
     private int nextSongId;
 
-    private MPDStatus() {
-    }
-
     /**
      * Given a server response, contructs a new MPDStatus.
      *
      * @param response
      *            server response.
      */
-    MPDStatus(List response) {
+    MPDStatus() {
         volume = -1;
         bitrate = -1;
         playlistVersion = -1;
@@ -99,10 +96,14 @@ public class MPDStatus {
         channels = 0;
         bitsPerSample = 0;
         updating = false;
-
-        Iterator it = response.iterator();
-        while (it.hasNext()) {
-            String line = (String) it.next();
+    }
+    
+    /**
+     * Updates the state of the MPD Server...
+     * @param response
+     */
+    public void updateStatus(List<String> response) {
+        for (String line : response) {
             if (line.startsWith("volume:")) {
                 this.volume = Integer.parseInt(line.substring("volume: ".length()));
             } else if (line.startsWith("bitrate:")) {

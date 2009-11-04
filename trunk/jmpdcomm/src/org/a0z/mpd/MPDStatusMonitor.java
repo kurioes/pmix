@@ -34,9 +34,9 @@ public class MPDStatusMonitor extends Thread {
 
     private boolean giveup;
 
-    private Collection statusChangedListeners;
+    private LinkedList<StatusChangeListener> statusChangedListeners;
 
-    private Collection trackPositionChangedListeners;
+    private LinkedList<TrackPositionListener> trackPositionChangedListeners;
 
     /**
      * Constructs a MPDStatusMonitor.
@@ -47,8 +47,8 @@ public class MPDStatusMonitor extends Thread {
         super("MPDStatusMonitor");
         this.mpd = mpd;
         this.giveup = false;
-        statusChangedListeners = new LinkedList();
-        trackPositionChangedListeners = new LinkedList();
+        statusChangedListeners = new LinkedList<StatusChangeListener>();
+        trackPositionChangedListeners = new LinkedList<TrackPositionListener>();
         this.delay = delay;
     }
 
@@ -71,9 +71,8 @@ public class MPDStatusMonitor extends Thread {
             Boolean connectionState = Boolean.valueOf(mpd.isConnected());
             
             if (connectionLost || oldConnectionState != connectionState) {
-                Iterator it = statusChangedListeners.iterator();
-                while (it.hasNext()) {
-                    ((StatusChangeListener) it.next()).connectionStateChanged(new MPDConnectionStateChangedEvent(connectionState.booleanValue(), connectionLost));
+                for (StatusChangeListener listener : statusChangedListeners) {
+                	listener.connectionStateChanged(new MPDConnectionStateChangedEvent(connectionState.booleanValue(), connectionLost));
                 }
                 connectionLost = false;
                 oldConnectionState = connectionState;
@@ -94,45 +93,40 @@ public class MPDStatusMonitor extends Thread {
 
                     //playlist
                     if (oldPlaylistVersion != playlistVersion && playlistVersion != -1) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).playlistChanged(new MPDPlaylistChangedEvent(status, oldPlaylistVersion));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.playlistChanged(new MPDPlaylistChangedEvent(status, oldPlaylistVersion));
                         }
                         oldPlaylistVersion = playlistVersion;
                     }
 
                     //song
                     if (oldSong != song) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).trackChanged(new MPDTrackChangedEvent(oldSong, status));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.trackChanged(new MPDTrackChangedEvent(oldSong, status));
                         }
                         oldSong = song;
                     }
 
                     //time
                     if (oldElapsedTime != elapsedTime) {
-                        Iterator it = trackPositionChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((TrackPositionListener) it.next()).trackPositionChanged(new MPDTrackPositionChangedEvent(status));
+                        for (TrackPositionListener listener : trackPositionChangedListeners) {
+                            listener.trackPositionChanged(new MPDTrackPositionChangedEvent(status));
                         }
                         oldElapsedTime = elapsedTime;
                     }
 
                     //state
                     if (oldState != state) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).stateChanged(new MPDStateChangedEvent(oldState, status));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.stateChanged(new MPDStateChangedEvent(oldState, status));
                         }
                         oldState = state;
                     }
 
                     //volume
                     if (oldVolume != volume) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).volumeChanged(new MPDVolumeChangedEvent(oldVolume, status));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.volumeChanged(new MPDVolumeChangedEvent(oldVolume, status));
                         }
                         oldVolume = volume;
                     }
@@ -148,18 +142,16 @@ public class MPDStatusMonitor extends Thread {
 
                     //volume
                     if (oldRandom != random) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).randomChanged(new MPDRandomChangedEvent(random.booleanValue()));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.randomChanged(new MPDRandomChangedEvent(random.booleanValue()));
                         }
                         oldRandom = random;
                     }
 
                     //update database
                     if (oldUpdating != updating) {
-                        Iterator it = statusChangedListeners.iterator();
-                        while (it.hasNext()) {
-                            ((StatusChangeListener) it.next()).updateStateChanged(new MPDUpdateStateChangedEvent(updating.booleanValue()));
+                        for (StatusChangeListener listener : statusChangedListeners) {
+                            listener.updateStateChanged(new MPDUpdateStateChangedEvent(updating.booleanValue()));
                         }
                         oldUpdating = updating;
                     }
