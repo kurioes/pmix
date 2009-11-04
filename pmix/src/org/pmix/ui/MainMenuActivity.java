@@ -1,5 +1,6 @@
 package org.pmix.ui;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.Serializable;
@@ -228,19 +229,19 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		
 		button = (ImageButton) findViewById(R.id.forward);
 		button.setOnClickListener(buttonEventHandler);
+		progressBarVolume.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
 
+				System.out.println("Vol2:" + progressBarVolume.getProgress());
+			}
+		});
 		progressBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+			
+			
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromTouch) {
-				if(fromTouch)
-				{
-					try {
-						MPDApplication app = (MPDApplication)getApplication();
-						app.oMPDAsyncHelper.oMPD.setVolume(progress);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
 				
 			}
 
@@ -250,7 +251,37 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			}
 
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
+				MPDApplication app = (MPDApplication)getApplication();
+				Runnable async = new Runnable(){
+					@SuppressWarnings("unchecked")
+					@Override
+					public void run() 
+					{
+						try {
+							MPDApplication app = (MPDApplication)getApplication();
+							app.oMPDAsyncHelper.oMPD.setVolume((int)progress);
+						} catch (MPDServerException e) {
+							e.printStackTrace();
+						}
+					}
+					public int progress;
+					public Runnable setProgress(int prg)
+					{
+						progress =prg;
+						return this;
+					}
+				}.setProgress(seekBar.getProgress());
+				
+				app.oMPDAsyncHelper.execAsync(async);
+				
+				/*
+				try {
+					MPDApplication app = (MPDApplication)getApplication();
+					app.oMPDAsyncHelper.oMPD.setVolume(progress);
+				} catch (MPDServerException e) {
+					e.printStackTrace();
+				}
+				*/
 				
 			}
 		});
@@ -258,15 +289,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromTouch) {
-				if(fromTouch)
-				{
-					try {
-						MPDApplication app = (MPDApplication)getApplication();
-						app.oMPDAsyncHelper.oMPD.seek((int)progress);
-					} catch (MPDServerException e) {
-						e.printStackTrace();
-					}
-				}
 				
 			}
 
@@ -276,7 +298,38 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			}
 
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
+
+				MPDApplication app = (MPDApplication)getApplication();
+				Runnable async = new Runnable(){
+					@SuppressWarnings("unchecked")
+					@Override
+					public void run() 
+					{
+						try {
+							MPDApplication app = (MPDApplication)getApplication();
+							app.oMPDAsyncHelper.oMPD.seek((int)progress);
+						} catch (MPDServerException e) {
+							e.printStackTrace();
+						}
+					}
+					public int progress;
+					public Runnable setProgress(int prg)
+					{
+						progress =prg;
+						return this;
+					}
+				}.setProgress(seekBar.getProgress());
+				
+				app.oMPDAsyncHelper.execAsync(async);
+				
+				/*
+				try {
+					MPDApplication app = (MPDApplication)getApplication();
+					app.oMPDAsyncHelper.oMPD.seek((int)progress);
+				} catch (MPDServerException e) {
+					e.printStackTrace();
+				}
+				*/
 				
 			}
 		});

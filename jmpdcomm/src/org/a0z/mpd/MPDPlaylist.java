@@ -408,7 +408,7 @@ public class MPDPlaylist {
     public void swap(int song1Id, int song2Id) throws MPDServerException {
         String[] args = new String[2];
         args[0] = Integer.toString(song1Id);
-        args[0] = Integer.toString(song2Id);
+        args[1] = Integer.toString(song2Id);
         this.mpd.getMpdConnection().sendCommand(MPD_CMD_PLAYLIST_SWAP_ID, args);
         this.refresh();
     }

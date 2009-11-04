@@ -131,6 +131,8 @@ public class MPD {
     private static MpdContentHandlerFactory contentHandlerFactory = registerContentHandlerFactory();
 
     private MPDConnection mpdConnection;
+    
+    private MPDStatus mpdStatus;
 
     private MPDPlaylist playlist;
 
@@ -141,6 +143,7 @@ public class MPD {
      */
     public MPD() {
         this.playlist = new MPDPlaylist(this);
+        this.mpdStatus = new MPDStatus();
         this.rootDirectory = Directory.makeRootDirectory(this);
     }
 
@@ -418,8 +421,9 @@ public class MPD {
      * @throws MPDServerException if an error occur while contacting server.
      */
     public MPDStatus getStatus() throws MPDServerException {
-        List response = mpdConnection.sendCommand(MPD_CMD_STATUS);
-        return new MPDStatus(response);
+        List<String> response = mpdConnection.sendCommand(MPD_CMD_STATUS);
+        mpdStatus.updateStatus(response);
+        return mpdStatus;
     }
 
     /**
@@ -448,7 +452,7 @@ public class MPD {
      * @return <code>Collection</code> with all album names from database.
      * @throws MPDServerException if an error occur while contacting server.
      */
-    public Collection listAlbums() throws MPDServerException {
+    public LinkedList<String> listAlbums() throws MPDServerException {
         return listAlbums(null);
     }
 
@@ -584,21 +588,6 @@ public class MPD {
 
     /**
      * Seeks music to the position.
-     * @param music music position in playlist.
-     * @param position song position in seconds.
-     * @throws MPDServerException if an error occur while contacting server.
-     * @deprecated use <code>seek</code>.
-     * @see #seek(int, long)
-     */
-    public void seekByPosition(int music, long position) throws MPDServerException {
-        String[] args = new String[2];
-        args[0] = Integer.toString(music);
-        args[1] = Long.toString(position);
-        mpdConnection.sendCommand(MPD_CMD_SEEK, args);
-    }
-
-    /**
-     * Seeks music to the position.
      * @param songId music id in playlist.
      * @param position song position in seconds.
      * @throws MPDServerException if an error occur while contacting server.
@@ -608,6 +597,8 @@ public class MPD {
         args[0] = Integer.toString(songId);
         args[1] = Long.toString(position);
         mpdConnection.sendCommand(MPD_CMD_SEEK_ID, args);
+        mpdStatus.songId = songId;
+        mpdStatus.elapsedTime = position;
     }
 
     /**
@@ -659,6 +650,7 @@ public class MPD {
         args[0] = Integer.toString(vol);
 
         mpdConnection.sendCommand(MPD_CMD_SET_VOLUME, args);
+        mpdStatus.volume = volume;
     }
 
     /**
