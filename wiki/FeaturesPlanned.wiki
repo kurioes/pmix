@@ -39,3 +39,4 @@ PMix is still in early development phase... There are several features we would 
   * Check for new versions ([http://code.google.com/android/devel/sign-publish.html#market]) (obsolet with new versions?)
   * Reworking centralize connection management *sag is working this*
   * Search function
+  * Better Layout Management in Main screen (which allows wrapping of Artist/Album/Track)
