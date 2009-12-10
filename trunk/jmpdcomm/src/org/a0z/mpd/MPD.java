@@ -250,21 +250,19 @@ public class MPD {
      * @throws MPDServerException if an error occur while contacting server
      * @see org.a0z.mpd.Music
      */
-    public Collection find(String type, String string) throws MPDServerException {
+    public LinkedList<Music> find(String type, String string) throws MPDServerException {
         return genericSearch(MPD_CMD_FIND, type, string);
     }
 
-    private Collection genericSearch(String searchCommand, String type, String string) throws MPDServerException {
+    private LinkedList<Music> genericSearch(String searchCommand, String type, String string) throws MPDServerException {
         String[] args = new String[2];
         args[0] = type;
         args[1] = string;
-        Collection result = new LinkedList();
-        Iterator it = mpdConnection.sendCommand(searchCommand, args).iterator();
-
-        List file = new LinkedList();
-        while (it.hasNext()) {
-            String line = (String) it.next();
-
+        
+        List<String> list = mpdConnection.sendCommand(searchCommand, args);
+        LinkedList<String> file = new LinkedList<String>();
+        LinkedList<Music> result = new LinkedList<Music>();
+        for (String line : list) {
             if (line.startsWith("file: ")) {
                 if (file.size() != 0) {
                     result.add(new Music(file));
@@ -273,6 +271,7 @@ public class MPD {
             }
             file.add(line);
         }
+
         if (file.size() > 0) {
             result.add(new Music(file));
         }
@@ -288,8 +287,8 @@ public class MPD {
      * @see Music
      * @see Directory
      */
-    public Collection getDir() throws MPDServerException {
-        return this.getDir("");
+    public LinkedList<FilesystemTreeEntry> getDir() throws MPDServerException {
+        return getDir("");
     }
 
     /**
@@ -301,17 +300,14 @@ public class MPD {
      * @see Music
      * @see Directory
      */
-    public Collection getDir(String dir) throws MPDServerException {
+    public LinkedList<FilesystemTreeEntry> getDir(String dir) throws MPDServerException {
         String[] args = new String[1];
         args[0] = dir;
-        //return mpdConnection.sendCommand(MPD_CMD_LSDIR, args);
-        Collection result = new LinkedList();
-        Iterator it = mpdConnection.sendCommand(MPD_CMD_LSDIR, args).iterator();
 
-        List file = new LinkedList();
-        while (it.hasNext()) {
-            String line = (String) it.next();
-
+        List<String> list  = mpdConnection.sendCommand(MPD_CMD_LSDIR, args);
+        LinkedList<String> file = new LinkedList<String>();
+        LinkedList<FilesystemTreeEntry> result = new LinkedList<FilesystemTreeEntry>();
+        for (String line : list) {
             if (line.startsWith("file: ") || line.startsWith("directory: ") || line.startsWith("playlist: ")) {
                 if (file.size() != 0) {
                     result.add(new Music(file));
@@ -319,11 +315,11 @@ public class MPD {
                 }
             }
             if (line.startsWith("playlist: ")) {
-                //TODO implementar playlist
+                // TODO: implement playlist
             } else if (line.startsWith("directory: ")) {
                 line = line.substring("directory: ".length());
                 result.add(rootDirectory.makeDirectory(line));
-            } else {
+            } else if (line.startsWith("file: ")) {
                 file.add(line);
             }
 
