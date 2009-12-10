@@ -1,23 +1,10 @@
 package org.pmix.ui;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
-import org.pmix.ui.MPDAsyncHelper.ConnectionListener;
-
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.DialogInterface.OnClickListener;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.preference.PreferenceManager;
 
 public class MPDConnectionHandler extends BroadcastReceiver {
 

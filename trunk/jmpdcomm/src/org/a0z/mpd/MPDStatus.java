@@ -1,6 +1,5 @@
 package org.a0z.mpd;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**

@@ -3,10 +3,7 @@ package org.pmix.ui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.a0z.mpd.MPD;
 import org.a0z.mpd.Music;
 import org.a0z.mpd.MPDPlaylist;
 import org.a0z.mpd.MPDServerException;
@@ -20,7 +17,6 @@ import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
 import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,9 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -110,7 +103,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		title = (String)songlist.get(info.position).get("title");
 
 		menu.setHeaderTitle(title);
-		MenuItem addArtist = menu.add(menu.NONE, 0, 0, R.string.removeSong);
+		MenuItem addArtist = menu.add(ContextMenu.NONE, 0, 0, R.string.removeSong);
 		addArtist.setOnMenuItemClickListener(this);
 	}
 
