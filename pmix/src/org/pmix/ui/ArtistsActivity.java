@@ -11,12 +11,7 @@ import org.pmix.ui.MPDAsyncHelper.AsyncExecListener;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.MenuItem.OnMenuItemClickListener;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class ArtistsActivity extends BrowseActivity implements AsyncExecListener {
@@ -33,28 +28,19 @@ public class ArtistsActivity extends BrowseActivity implements AsyncExecListener
 		setContentView(R.layout.artists);
 
 		pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Artists...");
-		
-		ListView list = getListView();
-		registerForContextMenu(list);
-	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		
 		if(items == null)
 		{
 			// Loading Artists asynchronous...
 			MPDApplication app = (MPDApplication)getApplication();
 			app.oMPDAsyncHelper.addAsyncExecListener(this);
 			iJobID = app.oMPDAsyncHelper.execAsync(new Runnable(){
-				@SuppressWarnings("unchecked")
 				@Override
 				public void run() 
 				{
 					try {
 						MPDApplication app = (MPDApplication)getApplication();
-						items = (List)app.oMPDAsyncHelper.oMPD.listArtists();
+						items = app.oMPDAsyncHelper.oMPD.listArtists();
 					} catch (MPDServerException e) {
 						
 					}
@@ -64,40 +50,10 @@ public class ArtistsActivity extends BrowseActivity implements AsyncExecListener
 		else
 		{
 			// Yes, its our job which is done...
-			ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(artistsAdapter);
-			pd.dismiss();
+			OnArtistsLoaded();
 		}
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		String artist = (String) this.getListView().getItemAtPosition(info.position);
-		
-		menu.setHeaderTitle(artist);
-		MenuItem addArtist = menu.add(R.string.addArtist);
-		addArtist.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-			private String artist;
-			public boolean onMenuItemClick(MenuItem item) {
-				try {
-					MPDApplication app = (MPDApplication)getApplication();
-					ArrayList<Music> songs = new ArrayList<Music>(app.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ARTIST, artist));
-					app.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
-					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.artistAdded), artist), ArtistsActivity.this);
-				} catch (MPDServerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return true;
-			}
-			public OnMenuItemClickListener setArtist(String artist)
-			{
-				this.artist = artist;
-				return this;
-			}
-		}.setArtist(artist));
-	}
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -110,13 +66,36 @@ public class ArtistsActivity extends BrowseActivity implements AsyncExecListener
 	public void asyncExecSucceeded(int jobID) {
 		if(iJobID == jobID)
 		{
-			// Yes, its our job which is done...
-			ArrayAdapter<String> artistsAdapter = new ArrayAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(artistsAdapter);
-			// No need to listen further...
+			// Yes, its our job which is done, no need to listen further...
 			MPDApplication app = (MPDApplication)getApplication();
 			app.oMPDAsyncHelper.removeAsyncExecListener(this);
-			pd.dismiss();
+			OnArtistsLoaded();
 		}
+	}
+	
+	protected void OnArtistsLoaded()
+	{
+		ListViewButtonAdapter<String> artistsAdapter = new ListViewButtonAdapter<String>(ArtistsActivity.this, android.R.layout.simple_list_item_1, items);
+		
+		PlusListener AddListener = new PlusListener() {
+			@Override
+			public void OnAdd(CharSequence sSelected, int iPosition)
+			{
+				try {
+					MPDApplication app = (MPDApplication)getApplication();
+					ArrayList<Music> songs = new ArrayList<Music>(app.oMPDAsyncHelper.oMPD.find(MPD.MPD_FIND_ARTIST, sSelected.toString()));
+					app.oMPDAsyncHelper.oMPD.getPlaylist().add(songs);
+					MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.artistAdded), sSelected), ArtistsActivity.this);
+				} catch (MPDServerException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+
+		
+		
+		artistsAdapter.SetPlusListener(AddListener);
+		setListAdapter(artistsAdapter);
+		pd.dismiss();
 	}
 }

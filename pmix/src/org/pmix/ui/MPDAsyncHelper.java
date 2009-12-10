@@ -1,7 +1,6 @@
 package org.pmix.ui;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.a0z.mpd.MPD;

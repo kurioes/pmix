@@ -10,18 +10,12 @@ import org.a0z.mpd.Music;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.MenuItem.OnMenuItemClickListener;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class FSActivity extends BrowseActivity implements OnMenuItemClickListener {
+public class FSActivity extends BrowseActivity {
 	private List<String> items = new ArrayList<String>();
 	private Directory currentDirectory = null;
-	private Directory currentContextDirectory = null;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -50,31 +44,38 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 			}
 
 			// Put the list on the screen...
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(notes);
-			registerForContextMenu(getListView());
+			ListViewButtonAdapter<String> fsentries = new ListViewButtonAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+			PlusListener AddListener = new PlusListener() {
+				@Override
+				public void OnAdd(CharSequence sSelected, int iPosition)
+					{
+						try {
+							MPDApplication app = (MPDApplication)getApplication();
+							Directory ToAdd = currentDirectory.getDirectory(sSelected.toString());
+							if(ToAdd != null) {
+								// Valid directory
+								app.oMPDAsyncHelper.oMPD.getPlaylist().add(ToAdd);
+								MainMenuActivity.notifyUser(getResources().getString(R.string.addedDirectoryToPlaylist), FSActivity.this);
+							} else {
+								Music music = currentDirectory.getFileByTitle(sSelected.toString());
+								if(music != null) {
+									app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
+									MainMenuActivity.notifyUser(getResources().getString(R.string.songAdded), FSActivity.this);
+								}
+							}
+						} catch (MPDServerException e) {
+							e.printStackTrace();
+						}
+					}
+				};
+			fsentries.SetPlusListener(AddListener);
+			setListAdapter(fsentries);
 		} catch (MPDServerException e) {
 			e.printStackTrace();
 			this.setTitle(e.getMessage());
 		}
 
 	}
-
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		String dirname = (String) this.getListView().getItemAtPosition(info.position);
-		if (info.position > currentDirectory.getDirectories().size() - 1 || currentDirectory.getDirectories().size() == 0) {
-			// Its a file, no Menu needed...
-			return;
-		}
-		currentContextDirectory = (Directory) currentDirectory.getDirectories().toArray()[info.position];
-		menu.setHeaderTitle(dirname);
-		MenuItem addArtist = menu.add(R.string.addDirectory);
-		addArtist.setOnMenuItemClickListener(this);
-	}
-	
-	
 	
 	
 	@Override
@@ -116,16 +117,4 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 
 	}
 
-	public boolean onMenuItemClick(MenuItem item) {
-		try {
-			MPDApplication app = (MPDApplication)getApplication();
-			app.oMPDAsyncHelper.oMPD.getPlaylist().add(currentContextDirectory);
-			MainMenuActivity.notifyUser(getResources().getString(R.string.addedDirectoryToPlaylist), this);
-			//((SimpleAdapter)getListAdapter()).notifyDataSetChanged();
-		} catch (MPDServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return true;
-	}
 }

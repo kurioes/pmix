@@ -18,11 +18,9 @@ public class WifiConnectionSettings extends PreferenceActivity {
 
 	private static final String KEY_WIFI_BASED_CATEGORY = "wifibasedCategory";
 	private static final String KEY_WIFI_BASED_SCREEN = "wifibasedScreen";
-	private static final String KEY_DEFAULT_CATEGORY = "defaultCategory";
 	
 
 	private PreferenceCategory mWifibasedCategory; 
-	private PreferenceCategory mDefaultCategory;
 	
 	private List<WifiConfiguration> mWifiList;
 	private WifiManager mWifiManager;
@@ -36,7 +34,6 @@ public class WifiConnectionSettings extends PreferenceActivity {
 		final PreferenceScreen preferenceScreen = getPreferenceScreen();
 
 		mWifibasedCategory = (PreferenceCategory)preferenceScreen.findPreference(KEY_WIFI_BASED_CATEGORY);
-		mDefaultCategory = (PreferenceCategory)preferenceScreen.findPreference(KEY_DEFAULT_CATEGORY);
 		
 		mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 	}
