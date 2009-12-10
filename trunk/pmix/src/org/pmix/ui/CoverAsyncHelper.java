@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.pmix.cover.CoverRetriever;
 import org.pmix.cover.LastFMCover;
 
 import android.graphics.Bitmap;
@@ -106,7 +105,6 @@ public class CoverAsyncHelper extends Handler {
 						HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
 						conn.setDoInput(true);
 						conn.connect();
-						int length = conn.getContentLength();
 						InputStream is = conn.getInputStream();
 						Bitmap bmImg = BitmapFactory.decodeStream(is);
 						CoverAsyncHelper.this.obtainMessage(EVENT_COVERDOWNLOADED, bmImg).sendToTarget();

@@ -3,6 +3,7 @@ package org.pmix.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.a0z.mpd.Directory;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
@@ -16,7 +17,6 @@ public class SongsActivity extends BrowseActivity {
 
 	private List<Music> musics = null;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -33,45 +33,49 @@ public class SongsActivity extends BrowseActivity {
 				items.add(music.getTitle());
 			}
 
-			// items.addAll(MainMenuActivity.oMPDAsyncHelper.oMPD..listAlbums(artist));
 
-			ArrayAdapter<String> notes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-			setListAdapter(notes);
+			// Put the list on the screen...
+			ListViewButtonAdapter<String> fsentries = new ListViewButtonAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+			PlusListener AddListener = new PlusListener() {
+				@Override
+				public void OnAdd(CharSequence sSelected, int iPosition)
+				{
+					Music music = musics.get(iPosition);
+					try {
+						MPDApplication app = (MPDApplication)getApplication();
+
+						app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
+						MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.songAdded),sSelected), SongsActivity.this);
+					} catch (MPDServerException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+			};
+			fsentries.SetPlusListener(AddListener);
+			setListAdapter(fsentries);
 		} catch (MPDServerException e) {
 			e.printStackTrace();
 			this.setTitle(e.getMessage());
 		}
 
 	}
-
+	
 	@Override
+	/**
+	 * We also listen to item clicks here...
+	 */
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-
 		Music music = musics.get(position);
 		try {
 			MPDApplication app = (MPDApplication)getApplication();
 
-			int songId = -1;
-			// try to find it in the current playlist first
-
-			//Collection<Music> founds = MainMenuActivity.oMPDAsyncHelper.oMPD.getPlaylist().find("filename", music.getFullpath());
-			
-			// not found
-			//if (founds.isEmpty()) {
-				//songId = 
-				app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
-			//} else {
-				// found
-			//	songId = founds.toArray(new Music[founds.size()])[0].getSongId();
-			//}
-			if (songId > -1) {
-				app.oMPDAsyncHelper.oMPD.skipTo(songId);
-			}
-			
+			app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
+			MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.songAdded),music.getName()), SongsActivity.this);
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }
