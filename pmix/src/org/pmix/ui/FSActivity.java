@@ -23,7 +23,6 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 	private Directory currentDirectory = null;
 	private Directory currentContextDirectory = null;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);

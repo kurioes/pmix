@@ -2,9 +2,6 @@ package org.pmix.ui;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.prefs.PreferenceChangeEvent;
-import java.util.prefs.PreferenceChangeListener;
 
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDOutput;
@@ -19,10 +16,7 @@ import org.a0z.mpd.event.MPDUpdateStateChangedEvent;
 import org.a0z.mpd.event.MPDVolumeChangedEvent;
 import org.a0z.mpd.event.StatusChangeListener;
 
-import android.app.Application;
 import android.content.Intent;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;

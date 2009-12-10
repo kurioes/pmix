@@ -26,7 +26,6 @@ import org.xml.sax.SAXException;
 
 import net.roarsoftware.lastfm.Result.Status;
 import net.roarsoftware.lastfm.cache.Cache;
-import net.roarsoftware.lastfm.cache.FileSystemCache;
 import net.roarsoftware.lastfm.cache.MemoryCache;
 import static net.roarsoftware.util.StringUtilities.encode;
 import static net.roarsoftware.util.StringUtilities.map;

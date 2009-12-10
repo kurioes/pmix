@@ -1,7 +1,6 @@
 package org.pmix.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.a0z.mpd.MPD;
@@ -10,7 +9,6 @@ import org.a0z.mpd.Music;
 import org.pmix.ui.MPDAsyncHelper.AsyncExecListener;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -20,8 +18,6 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ArtistsActivity extends BrowseActivity implements AsyncExecListener {
 	// Define this as public, more efficient due to the access of a anonymous inner class...

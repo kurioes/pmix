@@ -1,9 +1,8 @@
 package org.a0z.mpd;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -13,14 +12,10 @@ import java.util.TreeSet;
  * @version $Id: Directory.java 2614 2004-11-11 18:46:31Z galmeida $
  */
 public final class Directory implements FilesystemTreeEntry {
-    private Map files;
-
-    private Map directories;
-
+	private Map<String, Music> files;
+	private Map<String, Directory> directories;
     private Directory parent;
-
     private String name;
-
     private MPD mpd;
 
     /**
@@ -33,8 +28,8 @@ public final class Directory implements FilesystemTreeEntry {
         this.mpd = mpd;
         this.name = name;
         this.parent = parent;
-        this.directories = new HashMap();
-        this.files = new HashMap();
+        this.files = new HashMap<String, Music>();
+        this.directories = new HashMap<String, Directory>();
     }
 
     /**
@@ -58,34 +53,45 @@ public final class Directory implements FilesystemTreeEntry {
      * Retrieves files from directory.
      * @return files from directory.
      */
-    public Collection getFiles() {
-        Collection c = new TreeSet(new Comparator() {
-            public int compare(Object o1, Object o2) {
-                return ((Music) o1).getFilename().compareTo(((Music) o2).getFilename());
+    public TreeSet<Music> getFiles() {
+    	TreeSet<Music> c = new TreeSet<Music>(new Comparator<Music>() {
+            public int compare(Music o1, Music o2) {
+                return o1.getFilename().compareTo(o2.getFilename());
             }
         });
-        Iterator it = files.keySet().iterator();
-        while (it.hasNext()) {
-            Object o = files.get(it.next());
-            c.add(o);
+        for (String line : files.keySet()) {
+            c.add(files.get(line));
         }
         return c;
     }
 
     /**
+     * Gets Music object by title
+     * @param Title
+     * @return Returns null if title not found
+     */
+	public Music getFileByTitle(String Title)
+	{
+		for (Music music : files.values()) {
+			if(music.getTitle().equals(Title))
+				return music;
+		}
+		return null;
+	}
+    
+    
+    /**
      * Retrieves subdirectories.
      * @return subdirectories.
      */
-    public Collection getDirectories() {
-        Collection c = new TreeSet(new Comparator() {
-            public int compare(Object o1, Object o2) {
-                return ((Directory) o1).getName().compareTo(((Directory) o2).getName());
+    public TreeSet<Directory> getDirectories() {
+    	TreeSet<Directory> c = new TreeSet<Directory>(new Comparator<Directory>() {
+            public int compare(Directory o1, Directory o2) {
+                return o1.getName().compareTo(o2.getName());
             }
         });
-        Iterator it = directories.keySet().iterator();
-        while (it.hasNext()) {
-            Object o = directories.get(it.next());
-            c.add(o);
+        for (String line : directories.keySet()) {
+            c.add(directories.get(line));
         }
         return c;
     }
@@ -95,10 +101,8 @@ public final class Directory implements FilesystemTreeEntry {
      * @throws MPDServerException if an error occurs while contacting server.
      */
     public void refreshData() throws MPDServerException {
-        Collection c = mpd.getDir(this.getFullpath());
-        Iterator it = c.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
+        LinkedList<FilesystemTreeEntry> c = mpd.getDir(this.getFullpath());
+        for (FilesystemTreeEntry o : c) {
             if (o instanceof Directory) {
                 Directory dir = (Directory) o;
                 if (!directories.containsKey(dir.getName())) {
@@ -109,7 +113,7 @@ public final class Directory implements FilesystemTreeEntry {
                 if (!files.containsKey(music.getFilename())) {
                     files.put(music.getFilename(), music);
                 } else {
-                    Music old = (Music) files.get(music.getFilename());
+                    Music old = files.get(music.getFilename());
                     old.update(music);
                 }
             }
@@ -142,7 +146,7 @@ public final class Directory implements FilesystemTreeEntry {
             dir = new Directory(mpd, this, firstName);
             directories.put(dir.getName(), dir);
         } else {
-            dir = (Directory) directories.get(firstName);
+            dir = directories.get(firstName);
         }
 
         if (lastName != null) {
@@ -157,7 +161,7 @@ public final class Directory implements FilesystemTreeEntry {
      */
     public void addFile(Music file) {
         Directory dir = this;
-        if (this.getFullpath().compareTo(file.getPath()) == 0) {
+        if (getFullpath().compareTo(file.getPath()) == 0) {
             file.setParent(this);
             files.put(file.getFilename(), file);
         } else {
@@ -181,7 +185,7 @@ public final class Directory implements FilesystemTreeEntry {
      * @return a subdirectory.
      */
     public Directory getDirectory(String name) {
-        return (Directory) directories.get(name);
+        return directories.get(name);
     }
 
     /**
@@ -190,15 +194,13 @@ public final class Directory implements FilesystemTreeEntry {
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("+" + this.getFullpath() + "\n");
-        Iterator it = files.keySet().iterator();
-        while (it.hasNext()) {
-            sb.append(files.get(it.next()) + "\n");
+        sb.append("+" + getFullpath() + "\n");
+        for (String file : files.keySet()) {
+            sb.append(files.get(file).toString() + "\n");
         }
 
-        it = directories.keySet().iterator();
-        while (it.hasNext()) {
-            sb.append(directories.get(it.next()));
+        for (String dir : directories.keySet()) {
+            sb.append(directories.get(dir).toString() + "\n");
         }
         sb.append("-" + this.getFullpath() + "\n");
         return sb.toString();
@@ -217,10 +219,10 @@ public final class Directory implements FilesystemTreeEntry {
      * @return fullpathname of this directory.
      */
     public String getFullpath() {
-        if (this.getParent() != null && this.getParent().getParent() != null) {
-            return this.getParent().getFullpath() + "/" + this.getName();
+        if (getParent() != null && getParent().getParent() != null) {
+            return getParent().getFullpath() + "/" + getName();
         } else {
-            return this.getName();
+            return getName();
         }
     }
 }

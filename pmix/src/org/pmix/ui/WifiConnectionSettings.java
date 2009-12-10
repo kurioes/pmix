@@ -22,7 +22,7 @@ public class WifiConnectionSettings extends PreferenceActivity {
 	
 
 	private PreferenceCategory mWifibasedCategory; 
-	private PreferenceCategory mDefaultCategory; 
+	private PreferenceCategory mDefaultCategory;
 	
 	private List<WifiConfiguration> mWifiList;
 	private WifiManager mWifiManager;
