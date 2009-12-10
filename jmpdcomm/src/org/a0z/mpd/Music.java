@@ -8,7 +8,7 @@ import java.util.List;
  * @author Felipe Gustavo de Almeida
  * @version $Id: Music.java 2940 2005-02-09 02:31:48Z galmeida $
  */
-public class Music {
+public class Music implements FilesystemTreeEntry{
     /**
      * Used to indicate this <code>Music</code> is a stream.
      */

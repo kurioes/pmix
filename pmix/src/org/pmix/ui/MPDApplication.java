@@ -65,7 +65,7 @@ public class MPDApplication extends Application implements ConnectionListener, O
 		if(connectionLocks.size()>0)
 		{
 			if(!oMPDAsyncHelper.oMPD.isConnected() &&
-			   !currentActivity.getClass().equals(SettingsActivity.class))
+			   !currentActivity.getClass().equals(WifiConnectionSettings.class))
 			{
 				connect();
 			}
@@ -103,7 +103,8 @@ public class MPDApplication extends Application implements ConnectionListener, O
 				String sPassword = settings.getString("password", "");
 				oMPDAsyncHelper.setConnectionInfo(sServer, iPort, sPassword);
 		} else {
-			return;
+			// Absolutely no settings defined! Open Settings!
+			currentActivity.startActivityForResult(new Intent(currentActivity, WifiConnectionSettings.class), SETTINGS);
 		}
 		connectMPD();
 

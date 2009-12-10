@@ -2,17 +2,13 @@ package org.pmix.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.a0z.mpd.Directory;
-import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDServerException;
 import org.a0z.mpd.Music;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -21,7 +17,6 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 public class FSActivity extends BrowseActivity implements OnMenuItemClickListener {
 	private List<String> items = new ArrayList<String>();
@@ -36,7 +31,7 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 
 		items.clear();
 		try {
-			// Get Filesystem, try to use suplied subdirectory if available
+			// Get file system, try to use supplied sub directory if available
 			MPDApplication app = (MPDApplication)getApplication();
 			if (this.getIntent().getStringExtra("directory") != null) {
 				currentDirectory = app.oMPDAsyncHelper.oMPD.getRootDirectory().makeDirectory((String) this.getIntent().getStringExtra("directory"));
@@ -106,7 +101,7 @@ public class FSActivity extends BrowseActivity implements OnMenuItemClickListene
 			}
 		} else {
 			// click on a directory
-			// open the same subactivity, it would be better to reuse the
+			// open the same sub activity, it would be better to reuse the
 			// same instance
 
 			Intent intent = new Intent(this, FSActivity.class);

@@ -170,6 +170,7 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 			try {
 				Collection<MPDOutput> list = app.oMPDAsyncHelper.oMPD.getOutputs();
 				
+				pOutput.removeAll();
 				for(MPDOutput out : list)
 				{
 					CheckBoxPreference pref = new CheckBoxPreference(this);

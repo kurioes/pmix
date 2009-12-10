@@ -12,7 +12,7 @@ import java.util.TreeSet;
  * @author Felipe Gustavo de Almeida
  * @version $Id: Directory.java 2614 2004-11-11 18:46:31Z galmeida $
  */
-public final class Directory {
+public final class Directory implements FilesystemTreeEntry {
     private Map files;
 
     private Map directories;
