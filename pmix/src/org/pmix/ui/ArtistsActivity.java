@@ -14,6 +14,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 public class ArtistsActivity extends BrowseActivity implements AsyncExecListener {
 	// Define this as public, more efficient due to the access of a anonymous inner class...
 	// TODO: Is static really the solution? No, should be cashed in JMPDComm ,but it loads 
@@ -21,13 +24,18 @@ public class ArtistsActivity extends BrowseActivity implements AsyncExecListener
 	public static List<String> items = null;
 	private int iJobID = -1;
 	private ProgressDialog pd;
+	private boolean albumartist;
 	
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
+		
+		//load preferences for album artist tag display option
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		albumartist = settings.getBoolean("albumartist", false);
 
-		pd = ProgressDialog.show(ArtistsActivity.this, "Loading...", "Load Artists...");
+		pd = ProgressDialog.show(ArtistsActivity.this, getResources().getString(R.string.loading), getResources().getString(R.string.loadingArtists));
 
 		if(items == null)
 		{
@@ -40,7 +48,11 @@ public class ArtistsActivity extends BrowseActivity implements AsyncExecListener
 				{
 					try {
 						MPDApplication app = (MPDApplication)getApplication();
-						items = app.oMPDAsyncHelper.oMPD.listArtists();
+						if(albumartist == true) {
+							items = app.oMPDAsyncHelper.oMPD.listAlbumArtists();
+						}else{
+							items = app.oMPDAsyncHelper.oMPD.listArtists();
+						}
 					} catch (MPDServerException e) {
 						
 					}

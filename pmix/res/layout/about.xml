@@ -4,10 +4,14 @@
 	android:layout_height="fill_parent" android:gravity="center">
 
 	<TextView android:layout_width="fill_parent"
-	android:layout_height="wrap_content" android:gravity="center" 
+	android:layout_height="wrap_content" android:gravity="center" android:textSize="25sp" android:padding="10px"
 	android:text="PMix is brought to you by the PMix developers. Visit us at http://code.google.com/p/pmix/!"/>	
 	
-	<TextView android:layout_width="fill_parent"
+	
+	<TextView android:layout_width="fill_parent" android:id="@+id/versionText"  android:padding="10px"
+	android:layout_height="wrap_content" android:singleLine="true"  android:gravity="center" />	
+	
+	<TextView android:layout_width="fill_parent" android:padding="10px"
 	android:layout_height="wrap_content" android:singleLine="true"  android:gravity="center" 
 	android:text="Thanks to last.fm for providing album arts"/>	
 		

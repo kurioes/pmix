@@ -72,7 +72,7 @@ public class SongsActivity extends BrowseActivity {
 			MPDApplication app = (MPDApplication)getApplication();
 
 			app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
-			MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.songAdded),music.getName()), SongsActivity.this);
+			MainMenuActivity.notifyUser(String.format(getResources().getString(R.string.songAdded,music.getTitle()),music.getName()), SongsActivity.this);
 		} catch (MPDServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

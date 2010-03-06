@@ -9,6 +9,11 @@
 	<string name="volume">Volume</string>
 	<string name="track">Track</string>
 	<string name="ok">OK</string>
+	<string name="quit">Quit</string>
+	<string name="retry">Retry</string>
+	<string name="loading">Loading...</string>
+	<string name="loadingAlbums">Loading Albums...</string>
+	<string name="loadingArtists">Loading Artists...</string>
 	<string name="serverAddress">Server Address :</string>
 	<string name="playlist">Playlist</string>
 	<string name="addAlbum">Add Album</string>
@@ -32,6 +37,8 @@
 	<string name="randomDescription">Enable/Disable random</string>
 	<string name="repeat">Repeat</string>
 	<string name="repeatDescription">Enable/Disable repeat</string>
+	<string name="albumartist">Album Artist</string>
+	<string name="albumartistDescription">Use Album Artist tag in Artists view</string>
 	<string name="version">Version</string>
 	<string name="songs">Songs</string>
 	<string name="serverInformation">Server Information</string>
@@ -44,4 +51,21 @@
 	<string name="songAdded">Song %s added</string>
 	<string name="about">About</string>
 	<string name="aboutDescription">About PMix</string>
+	<string name="waitForWLAN">Waiting for WLAN to be connected...</string>
+	<string name="connectionFailed">Connection Failed</string>
+	<string name="connectionFailedMessage">Connection to MPD-Server failed! Check if the Server is running and reachable. (%s)</string>
+	<string name="connecting">Connecting...</string>
+	<string name="connectingToServer">Connecting to MPD-Server.</string>
+	<string name="connected">Connected</string>
+	<string name="notInRange">Not in range, remembered</string>
+	
+	<string name="preferredConnection">Preferred connection</string>
+	<string name="chooseWLAN">Choose a WLAN network</string>
+	<string name="wlanBasedSettings">WLAN based connection</string>
+	<string name="defaultSettings">Default connection settings</string>
+	<string name="wlanBasedSettingsDescription">Set WLAN based MPD-Host/Port and password</string>
+	<string name="defaultSettingsDescription">Set default MPD-Host/Port and password</string>
+	
+	
+	
 </resources>

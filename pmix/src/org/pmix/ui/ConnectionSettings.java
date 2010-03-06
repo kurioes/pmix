@@ -1,12 +1,16 @@
 package org.pmix.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class ConnectionSettings extends PreferenceActivity {
+	public static final int MAIN = 0;
 
 	private static final String KEY_CONNECTION_CATEGORY = "connectionCategory";
 	
@@ -35,21 +39,31 @@ public class ConnectionSettings extends PreferenceActivity {
 			
 		}
 	}
-/*
+	
 	@Override
-	protected void onStart() {
-		super.onStart();
-		MPDApplication app = (MPDApplication)getApplicationContext();
-		app.setActivity(this);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		
+		return result;
 	}
-
+	
 	@Override
-	protected void onStop() {
-		super.onStop();
-		MPDApplication app = (MPDApplication)getApplicationContext();
-		app.unsetActivity(this);
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		Intent i = null;
+		
+		switch (item.getItemId()) {
+	
+		case MAIN:
+			i = new Intent(this, MainMenuActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+			return true;
+		}
+		return false;
 	}
-	*/
+	
 	private void createDynamicSettings(String keyPrefix, PreferenceCategory toCategory)
 	{
 

@@ -13,10 +13,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnKeyListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 
 public class MPDApplication extends Application implements ConnectionListener, OnSharedPreferenceChangeListener {
 	
@@ -115,19 +117,31 @@ public class MPDApplication extends Application implements ConnectionListener, O
 			ad.dismiss();
 		
 		ad = new ProgressDialog(currentActivity);
-		ad.setTitle("Connecting...");
-		ad.setMessage("Connecting to MPD-Server.");
+		ad.setTitle(getResources().getString(R.string.connecting));
+		ad.setMessage(getResources().getString(R.string.connectingToServer));
 		ad.setCancelable(false);
+		ad.setOnKeyListener(new OnKeyListener() {
+			
+			@Override
+			public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+				// Handle all keys!
+				return true;
+			}
+		});
 		ad.show();
 
 		oMPDAsyncHelper.doConnect();
 	}
 	
 
-	public void onSharedPreferenceChanged(SharedPreferences settings, String arg1) {
+	public void onSharedPreferenceChanged(SharedPreferences settings, String key) {
 		String wifiSSID = getCurrentSSID();
 		
-		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
+		if (key.equals("albumartist")) {
+			//clear current cached artist list on change of tag settings
+			ArtistsActivity.items = null;
+			
+		} else if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
 			String sServer = settings.getString(wifiSSID + "hostname", "");
 			int iPort = Integer.getInteger(settings.getString(wifiSSID + "port", "6600"), 6600);
 			String sPassword = settings.getString(wifiSSID + "password", "");
@@ -169,11 +183,11 @@ public class MPDApplication extends Application implements ConnectionListener, O
 					System.out.println(this.getClass());
 					oDialogClickListener = new DialogClickListener();
 					AlertDialog.Builder test = new AlertDialog.Builder(currentActivity);
-					test.setTitle("Connection Failed");
-					test.setMessage("Connection to MPD-Server failed! Check if the Server is running and reachable. (" + message + ")");
-					test.setNegativeButton("Exit", oDialogClickListener);
-					test.setNeutralButton("Settings", oDialogClickListener);
-					test.setPositiveButton("Retry", oDialogClickListener);
+					test.setTitle(getResources().getString(R.string.connectionFailed));
+					test.setMessage(String.format(getResources().getString(R.string.connectionFailedMessage), message));
+					test.setNegativeButton(getResources().getString(R.string.quit), oDialogClickListener);
+					test.setNeutralButton(getResources().getString(R.string.settings), oDialogClickListener);
+					test.setPositiveButton(getResources().getString(R.string.retry), oDialogClickListener);
 					ad = test.show();
 			}
 		}
@@ -192,7 +206,7 @@ public class MPDApplication extends Application implements ConnectionListener, O
 			switch(which) {
 				case AlertDialog.BUTTON3:
 					// Show Settings
-					currentActivity.startActivityForResult(new Intent(currentActivity, SettingsActivity.class), SETTINGS);
+					currentActivity.startActivityForResult(new Intent(currentActivity, WifiConnectionSettings.class), SETTINGS);
 					break;
 				case AlertDialog.BUTTON2:
 					currentActivity.finish();
@@ -241,7 +255,7 @@ public class MPDApplication extends Application implements ConnectionListener, O
 			if(ad!=null)
 				ad.dismiss();
 			AlertDialog.Builder test = new AlertDialog.Builder(currentActivity);
-			test.setMessage("Waiting for WLAN to be connected...");
+			test.setMessage(getResources().getString(R.string.waitForWLAN));
 			ad = test.show();
 		}
 	}

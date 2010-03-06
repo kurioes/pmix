@@ -1,12 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"  android:key="preferencescreen">
-	<PreferenceCategory android:title="Preferred connection">
-		<PreferenceScreen android:title="Wi-Fi based connection" android:summary="Set Wi-Fi based MPD-Host/Port and password" android:key="wifibasedScreen">
-			<PreferenceCategory android:title="Choose a Wi-Fi network" android:key="wifibasedCategory">
+	<PreferenceCategory android:title="@string/preferredConnection">
+		<PreferenceScreen android:title="@string/wlanBasedSettings" android:summary="@string/wlanBasedSettingsDescription" android:key="wifibasedScreen">
+			<PreferenceCategory android:title="@string/chooseWLAN" android:key="wifibasedCategory">
 			</PreferenceCategory>
 		</PreferenceScreen>	
 	</PreferenceCategory>
 	<PreferenceCategory android:visible="false" android:title="Default connection" android:key="defaultCategory">
-		<PreferenceScreen android:title="Default connection settings" android:summary="Set default MPD-Host/Port and password" android:key="defaultScreen">
+		<PreferenceScreen android:title="@string/defaultSettings" android:summary="@string/defaultSettingsDescription" android:key="defaultScreen">
 	
 			<intent android:action="android.intent.action.MAIN"
                     android:targetPackage="org.pmix.ui"

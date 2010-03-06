@@ -60,7 +60,7 @@ public class FSActivity extends BrowseActivity {
 								Music music = currentDirectory.getFileByTitle(sSelected.toString());
 								if(music != null) {
 									app.oMPDAsyncHelper.oMPD.getPlaylist().add(music);
-									MainMenuActivity.notifyUser(getResources().getString(R.string.songAdded), FSActivity.this);
+									MainMenuActivity.notifyUser(getResources().getString(R.string.songAdded, sSelected), FSActivity.this);
 								}
 							}
 						} catch (MPDServerException e) {

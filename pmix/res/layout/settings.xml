@@ -29,6 +29,12 @@
 			android:summary="@string/repeatDescription"
 			android:persistent="false"
 		/>
+		<CheckBoxPreference
+			android:key="albumartist"
+			android:title="@string/albumartist"
+			android:summary="@string/albumartistDescription"
+			android:persistent="true"
+		/>
 		<!--  Server Information -->
 		<PreferenceScreen android:key="informationScreen" android:title="@string/serverInformation" android:summary="@string/serverInformationDescription">
 			<PreferenceCategory android:key="outputs" android:id="@+id/preferenceOutput" android:title="@string/serverInformation">
