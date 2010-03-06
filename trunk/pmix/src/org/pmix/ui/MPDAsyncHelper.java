@@ -254,7 +254,7 @@ public class MPDAsyncHelper extends Handler {
 				 		oMPD.connect(conInfo.sServer, conInfo.iPort);
 				 		if(!conInfo.sPassword.equals(""))
 				 			oMPD.password(conInfo.sPassword);
-				 		MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();	
+				 		MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTSUCCEEDED).sendToTarget();
 					} catch (MPDServerException e) {
 						MPDAsyncHelper.this.obtainMessage(EVENT_CONNECTFAILED, e.getMessage()).sendToTarget();
 					}

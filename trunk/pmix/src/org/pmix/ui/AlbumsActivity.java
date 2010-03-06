@@ -26,9 +26,9 @@ public class AlbumsActivity extends BrowseActivity implements AsyncExecListener 
 		super.onCreate(icicle);
 		setContentView(R.layout.artists);
 		
-		pd = ProgressDialog.show(AlbumsActivity.this, "Loading...", "Load Albums...");
+		pd = ProgressDialog.show(AlbumsActivity.this, getResources().getString(R.string.loading), getResources().getString(R.string.loadingAlbums));
 
-		setTitle((String) getIntent().getStringExtra("artist"));
+		setTitle(getResources().getString(R.string.albums));
 		
 
 		MPDApplication app = (MPDApplication)getApplication();

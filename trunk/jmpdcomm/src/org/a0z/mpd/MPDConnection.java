@@ -49,12 +49,11 @@ public class MPDConnection {
 
     final synchronized int[] connect() throws MPDServerException {
         try {
-            this.sock = new Socket();
-            sock.connect(new InetSocketAddress(hostAddress, hostPort), 10000);
 
+            this.sock = new Socket();
+            sock.connect(new InetSocketAddress(hostAddress, hostPort), 1000);
             BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()), 1024);
             String line = in.readLine();
-
             if (line == null) {
                 throw new MPDServerException("No response from server");
             } else if (line.startsWith(MPD_RESPONSE_OK)) {

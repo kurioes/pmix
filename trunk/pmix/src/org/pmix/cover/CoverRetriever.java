@@ -34,8 +34,8 @@ public class CoverRetriever {
 	}
 
 	private static String urlEncode(String a) throws UnsupportedEncodingException {
-		a = a.replace('é', 'e').replace('è', 'e').replace('ê', 'e').replace('ë', 'e');
-		a = a.replace('à', 'a').replace('ï', 'i').replace('î', 'i');
+		a = a.replace('\u0232', 'e').replace('\u0232', 'e').replace('\u0234', 'e').replace('\u0235', 'e');
+		a = a.replace('\u0224', 'a').replace('\u0239', 'i').replace('\u0238', 'i');
 
 		return URLEncoder.encode(a, "utf-8");
 	}

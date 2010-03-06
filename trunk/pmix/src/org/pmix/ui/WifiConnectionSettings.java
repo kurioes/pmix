@@ -4,18 +4,19 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class WifiConnectionSettings extends PreferenceActivity {
 
+	private static final int MAIN = 0;
 	private static final String KEY_WIFI_BASED_CATEGORY = "wifibasedCategory";
 	private static final String KEY_WIFI_BASED_SCREEN = "wifibasedScreen";
 	
@@ -39,26 +40,28 @@ public class WifiConnectionSettings extends PreferenceActivity {
 	}
 
 	@Override
-	protected void onStart()
-	{
-		super.onStart();
-		MPDApplication app = (MPDApplication)getApplicationContext();
-		app.setActivity(this);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+		menu.add(0,MAIN, 0, R.string.mainMenu).setIcon(android.R.drawable.ic_menu_revert);
+		
+		return result;
 	}
-
-
+	
 	@Override
-	protected void onStop() {
-		super.onStop();
-		MPDApplication app = (MPDApplication)getApplicationContext();
-		app.unsetActivity(this);
+	public boolean onOptionsItemSelected(MenuItem item) {
+	
+		Intent i = null;
+		
+		switch (item.getItemId()) {
+	
+		case MAIN:
+			i = new Intent(this, MainMenuActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+			return true;
+		}
+		return false;
 	}
-    
-    @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
-    	//outState.putParcelableList("wifiNetworks", mWifiList);
-    }
 	
 	/**
 	 * Method is beeing called  on any click of an preference...
@@ -80,35 +83,16 @@ public class WifiConnectionSettings extends PreferenceActivity {
 				pref.setTitle(ssid);
 				
 				Intent intent = new Intent(this, ConnectionSettings.class);
-				//intent.setData(Uri.parse("content://connection/"+ssid));
 				intent.putExtra("SSID", ssid);
 				pref.setIntent(intent);
-				/*
-				PreferenceCategory prefCat = new PreferenceCategory(this);
-				prefCat.setTitle(ssid);
-				pref.addPreference(prefCat);
-				*/
 				if(WifiConfiguration.Status.CURRENT == wifi.status)
-					pref.setSummary("Connected");
+					pref.setSummary(getResources().getString(R.string.connected));
 				else
-					pref.setSummary("Not in range, remembered");
+					pref.setSummary(getResources().getString(R.string.notInRange));
 				mWifibasedCategory.addPreference(pref);
 			}
 		}
-		/*
-		if(preference.getKey().startsWith("wifiNetwork"))
-		{
-			// Wi-Fi PreferenceScreen
-			PreferenceScreen pScreen = (PreferenceScreen)preference;
-			
-			// Wi-Fi name
-			String wifiName = (String) pScreen.getTitle();
-			PreferenceCategory prefCat = (PreferenceCategory)pScreen.getPreference(0);
-			
-			
-			return true;
-		}
-		*/
+
 		return false;
 	}
 }

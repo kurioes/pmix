@@ -124,9 +124,14 @@ public class MPD {
     public static final String MPD_TAG_ALBUM = "album";
 
     /**
-     * List artits.
+     * List artist.
      */
     public static final String MPD_TAG_ARTIST = "artist";
+
+    /**
+     * List album artist.
+     */
+    public static final String MPD_TAG_ALBUM_ARTIST = "albumartist";
 
     private static MpdContentHandlerFactory contentHandlerFactory = registerContentHandlerFactory();
 
@@ -516,6 +521,25 @@ public class MPD {
         Collections.sort(result);
         return result;
     }
+
+	    /**
+	     * List all album artist names from database.
+	     * @return album artist names from database.
+	     * @throws MPDServerException if an error occur while contacting server.
+	     */
+	    public LinkedList<String> listAlbumArtists() throws MPDServerException {
+	        String[] args = new String[1];
+	        args[0] = MPD_TAG_ALBUM_ARTIST;
+	        List<String> list = mpdConnection.sendCommand(MPD_CMD_LIST_TAG, args);
+	        LinkedList<String> result = new LinkedList<String>();
+	        for (String s : list) {
+				String[] ss = s.split(": ");
+				if (ss.length > 1)
+					result.add(ss[1]);
+	        }
+	        Collections.sort(result);
+	        return result;
+	    }
 
     /**
      * Jumps to next playlist track.
