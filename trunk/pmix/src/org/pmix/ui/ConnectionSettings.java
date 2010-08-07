@@ -2,6 +2,7 @@ package org.pmix.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
@@ -82,6 +83,23 @@ public class ConnectionSettings extends PreferenceActivity {
 		prefPort.setDefaultValue("6600");
 		prefPort.setKey(keyPrefix+"port");
 		toCategory.addPreference(prefPort);
+
+		CheckBoxPreference prefEnableStream = new CheckBoxPreference(this);
+		prefEnableStream.setTitle(R.string.enablestream);
+		prefEnableStream.setSummary(R.string.enablestreamDescription);
+		prefEnableStream.setDefaultValue(false);
+		prefEnableStream.setKey(keyPrefix+"enablestream");
+		toCategory.addPreference(prefEnableStream);
+	
+		EditTextPreference prefStreamPort = new EditTextPreference(this);
+		prefStreamPort.setDialogTitle(R.string.streamport);
+		prefStreamPort.setTitle(R.string.streamport);
+		prefStreamPort.setSummary(R.string.streamportDescription);
+		prefStreamPort.setDefaultValue("8000");
+		prefStreamPort.setKey(keyPrefix+"streamport");
+		//prefStreamPort.setDependency(keyPrefix+"enablestream");
+		toCategory.addPreference(prefStreamPort);
+
 		
 		EditTextPreference prefPassword = new EditTextPreference(this);
 		prefPassword.setDialogTitle(R.string.password);
@@ -90,6 +108,7 @@ public class ConnectionSettings extends PreferenceActivity {
 		prefPassword.setDefaultValue("");
 		prefPassword.setKey(keyPrefix+"password");
 		toCategory.addPreference(prefPassword);
+
 		onContentChanged();
 		
 	}

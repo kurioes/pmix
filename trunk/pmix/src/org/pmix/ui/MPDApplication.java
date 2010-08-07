@@ -9,16 +9,19 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.media.MediaPlayer;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 public class MPDApplication extends Application implements ConnectionListener, OnSharedPreferenceChangeListener {
 	
@@ -31,6 +34,9 @@ public class MPDApplication extends Application implements ConnectionListener, O
 	
 	public static final int SETTINGS = 5;
 	
+	private Thread mp3_thread = null;
+	public CoverAsyncHelper oCoverAsyncHelper;
+
 	
 	public void setActivity(Activity activity)
 	{
@@ -264,4 +270,80 @@ public class MPDApplication extends Application implements ConnectionListener, O
 		return bWifiConnected;
 	}
 	
+	   class streamPlayer implements Runnable {
+	        private final Context ctx = getApplicationContext();
+	        MediaPlayer mp = null;
+	        String url = "";
+	        final Integer delay_ms = 1000;
+	        
+	        public streamPlayer() {
+	        }
+	        
+	        @Override
+	        public void run() {
+//	              Toast.makeText(ctx, "in run", 1).show();
+	                
+	            while (true) {
+	                try {
+	                    Thread.sleep(delay_ms);
+	                } catch (final Exception ex) {};
+	        		
+	                if (mp==null || !mp.isPlaying()) {
+	                	String sServer;
+	                	String sPort;
+	                	boolean mpEnable;
+	            		// Get Server name
+	            		final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
+	            		final WifiInfo info = ((WifiManager)getSystemService(WIFI_SERVICE)).getConnectionInfo();
+	                    final String wifiSSID = info.getSSID();
+	            		
+	            		if (!settings.getString(wifiSSID + "hostname", "").equals("")) {
+	            			sServer = settings.getString(wifiSSID + "hostname", "");
+	            			sPort = settings.getString(wifiSSID + "streamport", "");            			
+	                		mpEnable = settings.getBoolean(wifiSSID+"enablestream", false);
+	            		} else if (!settings.getString("hostname", "").equals("")) {
+	            			sServer = settings.getString("hostname", "");
+	            			sPort = settings.getString("streamport", "");
+	                		mpEnable = settings.getBoolean("enablestream", false);
+	            		} else {
+	            			continue;
+	            		}
+	            		if (!mpEnable) {
+	            			continue;
+	            		}
+	            		url = "http://" + sServer + ":" + sPort + "/mpd.mp3";
+
+						mp = new MediaPlayer();   
+	                    if (mp==null) {
+	                            final String s = ("Error creating Mediaplayer");
+	                            Toast.makeText(ctx, s, 1).show();
+	                    }
+	                    try {
+	                            mp.setDataSource(url);
+	                            mp.prepare();
+	                    } catch (final Exception ex) {
+	                    }
+	                    mp.start();
+	               }
+	            }
+	        }
+	    }
+
+	   
+	   public void start_coverAsyncHelper(MainMenuActivity arg) {
+		   if (oCoverAsyncHelper == null) {
+				oCoverAsyncHelper = new CoverAsyncHelper();
+		   }
+			oCoverAsyncHelper.addCoverDownloadListener(arg);
+	   }
+
+	    public void start_streamPlayer() {
+	    	if (mp3_thread == null) {
+	    		final streamPlayer my_mp3 = new streamPlayer();
+	    		mp3_thread = new Thread(my_mp3, "streamPlayer");
+	    		mp3_thread.start();
+	    	}
+	    }
+
+
 }

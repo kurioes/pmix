@@ -18,6 +18,12 @@
 	           android:defaultValue=""
 	           android:password="true"
 	           android:summary="@string/passwordDescription" /> 
-	           />-->
+	           />
+	    <EditTextPreference  
+	           android:key="streamport"
+	           android:title="@string/streamport"
+	           android:defaultValue="8000"
+	           android:summary="@string/streamportDescription"
+	           />-->  
 	</PreferenceCategory>
 </PreferenceScreen>

@@ -48,6 +48,7 @@ public class CoverAsyncHelper extends Handler {
 	}
 	public void addCoverDownloadListener(CoverDownloadListener listener)
 	{
+		coverDownloadListener.clear();
 		coverDownloadListener.add(listener);
 	}
 	

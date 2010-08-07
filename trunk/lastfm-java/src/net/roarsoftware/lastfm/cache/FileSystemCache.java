@@ -16,7 +16,7 @@ import net.roarsoftware.lastfm.scrobble.SubmissionData;
  *
  * @author Janni Kovacs
  */
-@SuppressWarnings({"ALL"})
+@SuppressWarnings({"all"})
 public class FileSystemCache extends Cache implements ScrobbleCache {
 
 	private static final String SUBMISSIONS_FILE = "submissions.txt";

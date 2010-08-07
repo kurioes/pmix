@@ -6,6 +6,8 @@ import java.util.HashMap;
 import org.a0z.mpd.MPD;
 import org.a0z.mpd.MPDOutput;
 import org.a0z.mpd.MPDServerException;
+import org.a0z.mpd.MPDStatistics;
+import org.a0z.mpd.MPDStatus;
 import org.a0z.mpd.event.MPDConnectionStateChangedEvent;
 import org.a0z.mpd.event.MPDPlaylistChangedEvent;
 import org.a0z.mpd.event.MPDRandomChangedEvent;
@@ -88,14 +90,16 @@ public class SettingsActivity extends PreferenceActivity implements StatusChange
 			
 			
 			// Server is Connected...
-			pRandom.setChecked(app.oMPDAsyncHelper.oMPD.getStatus().isRandom());
+			MPDStatus status = app.oMPDAsyncHelper.oMPD.getStatus();
+			pRandom.setChecked(status.isRandom());
 			pRandom.setOnPreferenceClickListener(onCheckPreferenceClickListener);
-			pRepeat.setChecked(app.oMPDAsyncHelper.oMPD.getStatus().isRepeat());
+			pRepeat.setChecked(status.isRepeat());
 			pRepeat.setOnPreferenceClickListener(onCheckPreferenceClickListener);
 			pVersion.setSummary(app.oMPDAsyncHelper.oMPD.getMpdVersion());
-			pArtists.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getArtists());
-			pAlbums.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getAlbums());
-			pSongs.setSummary(""+app.oMPDAsyncHelper.oMPD.getStatistics().getSongs());
+			MPDStatistics statistics = app.oMPDAsyncHelper.oMPD.getStatistics();
+			pArtists.setSummary(""+statistics.getArtists());
+			pAlbums.setSummary(""+statistics.getAlbums());
+			pSongs.setSummary(""+statistics.getSongs());
 			
 				
 		} catch (MPDServerException e) {
