@@ -26,7 +26,7 @@ public class MPD {
      * Min volume level.
      */
     public static final int MAX_VOLUME = 100;
-
+    
     private static final String MPD_CMD_CLEARERROR = "clearerror";
 
     private static final String MPD_CMD_CLOSE = "close";
@@ -142,6 +142,8 @@ public class MPD {
     private MPDPlaylist playlist;
 
     private Directory rootDirectory;
+	
+    private long statustime = 0;
 
     /**
      * Constructs a new MPD server controller without connection.
@@ -422,8 +424,12 @@ public class MPD {
      * @throws MPDServerException if an error occur while contacting server.
      */
     public MPDStatus getStatus() throws MPDServerException {
-        List<String> response = mpdConnection.sendCommand(MPD_CMD_STATUS);
-        mpdStatus.updateStatus(response);
+    	long time = System.currentTimeMillis();
+    	// update only if last update is older than 1 sec
+    	if (time-statustime > 1000) {
+    		List<String> response = mpdConnection.sendCommand(MPD_CMD_STATUS);
+    		mpdStatus.updateStatus(response);
+    	}
         return mpdStatus;
     }
 

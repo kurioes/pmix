@@ -44,17 +44,22 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		super.onCreate(icicle);
 		MPDApplication app = (MPDApplication)getApplication();
 		setContentView(R.layout.artists);
+		int cursong = 0;
+		int curid = 0;
 		
+		// TODO: profiling and optimization of try block
 		try {
 			MPDPlaylist playlist = app.oMPDAsyncHelper.oMPD.getPlaylist();
+			cursong = app.oMPDAsyncHelper.oMPD.getStatus().getSongPos();
 			playlist.refresh();
 			musics = playlist.getMusics();
+			curid = app.oMPDAsyncHelper.oMPD.getStatus().getSongId();
 			for(Music m : musics) {
 				HashMap<String,Object> item = new HashMap<String,Object>();
 				item.put( "songid", m.getSongId() );
 				item.put( "artist", m.getArtist() );
 				item.put( "title", m.getTitle() );
-				if(m.getSongId() == app.oMPDAsyncHelper.oMPD.getStatus().getSongId())
+				if(m.getSongId() == curid)
 					item.put( "play", android.R.drawable.ic_media_play );
 				else
 					item.put( "play", 0 );
@@ -72,6 +77,7 @@ public class PlaylistActivity extends ListActivity implements OnMenuItemClickLis
 		}
 		app.oMPDAsyncHelper.addStatusChangeListener(this);
 		ListView list = getListView();
+		list.setSelection(cursong);
 		/*
 		LinearLayout test = (LinearLayout)list.getChildAt(1);
 		ImageView img = (ImageView)test.findViewById(R.id.picture);

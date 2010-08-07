@@ -47,7 +47,7 @@ public class MPDPlaylist {
 
     private int lastPlaylistVersion = -1;
 
-    private boolean firstRefreash = true;
+    private boolean firstRefresh = true;
 
     private MPD mpd;
 
@@ -199,9 +199,9 @@ public class MPDPlaylist {
      * @return current playlist version.
      */
     public int refresh() throws MPDServerException {
-        if (firstRefreash) {
+        if (firstRefresh) {
             this.lastPlaylistVersion = this.reload();
-            firstRefreash = false;
+            firstRefresh = false;
         } else {
             this.lastPlaylistVersion = this.refresh(lastPlaylistVersion);
         }

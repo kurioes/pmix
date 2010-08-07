@@ -4,6 +4,8 @@
 	<comment></comment>
 	<projects>
 		<project>JMPDComm</project>
+		<project>lastfm-java</project>
+		<project>LastFM-Java</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

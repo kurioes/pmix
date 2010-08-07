@@ -24,10 +24,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,7 +80,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private TextView trackTime = null;
 
-	private CoverAsyncHelper oCoverAsyncHelper = null;
+//	private CoverAsyncHelper oCoverAsyncHelper = null;
 	long lastSongTime = 0;
 	long lastElapsedTime = 0;
 	
@@ -90,10 +94,12 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 	private static Toast notification = null;
 	
+	private MPDApplication app = null;
+	
 	
 	private ButtonEventHandler buttonEventHandler;
 	
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -106,7 +112,8 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		}
 
 	}
-
+	
+ 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -115,9 +122,15 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		//WifiManager wifi = (WifiManager)getSystemService(WIFI_SERVICE);
 		
 		myLogger.log(Level.INFO, "onCreate");
-		MPDApplication app = (MPDApplication)getApplication();
+		app = (MPDApplication)getApplication();
 		app.oMPDAsyncHelper.addStatusChangeListener(this);
 		app.oMPDAsyncHelper.addTrackPositionListener(this);
+		app.start_streamPlayer();
+		app.start_coverAsyncHelper(this);
+//		oCoverAsyncHelper = new CoverAsyncHelper();
+//		oCoverAsyncHelper.addCoverDownloadListener(this);
+
+
 		
 		//registerReceiver(, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION) );
 		registerReceiver(MPDConnectionHandler.getInstance(), new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION) );
@@ -191,8 +204,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 		coverSwitcherProgress.setIndeterminate(true);
 		coverSwitcherProgress.setVisibility(ProgressBar.INVISIBLE);
 		
-		oCoverAsyncHelper = new CoverAsyncHelper();
-		oCoverAsyncHelper.addCoverDownloadListener(this);
 		buttonEventHandler = new ButtonEventHandler();
 		ImageButton button = (ImageButton) findViewById(R.id.next);
 		button.setOnClickListener(buttonEventHandler);
@@ -233,7 +244,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				MPDApplication app = (MPDApplication)getApplication();
 				Runnable async = new Runnable(){
-					@SuppressWarnings("unchecked")
 					@Override
 					public void run() 
 					{
@@ -281,7 +291,6 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 
 				MPDApplication app = (MPDApplication)getApplication();
 				Runnable async = new Runnable(){
-					@SuppressWarnings("unchecked")
 					@Override
 					public void run() 
 					{
@@ -529,7 +538,7 @@ public class MainMenuActivity extends Activity implements StatusChangeListener, 
 					{
 						coverSwitcher.setVisibility(ImageSwitcher.INVISIBLE);
 						coverSwitcherProgress.setVisibility(ProgressBar.VISIBLE);
-						oCoverAsyncHelper.downloadCover(artist, album);
+						app.oCoverAsyncHelper.downloadCover(artist, album);
 						lastArtist = artist;
 						lastAlbum = album;
 					}

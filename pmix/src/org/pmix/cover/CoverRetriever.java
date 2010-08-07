@@ -79,9 +79,7 @@ public class CoverRetriever {
 		String artist = "The Hoosiers";
 		String album = "a trick to life";
 
-		CoverRetriever coverRetriever = new CoverRetriever();
-
-		String url = coverRetriever.getCoverUrl(artist, album);
+		String url = CoverRetriever.getCoverUrl(artist, album);
 
 		System.out.println(url);
 
